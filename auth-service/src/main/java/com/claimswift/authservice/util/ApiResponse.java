@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import org.slf4j.MDC;
 
 @Data
 @Builder
@@ -15,18 +14,17 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
-    private boolean success;
+    private String code;
     private String message;
     private T data;
-    private LocalDateTime timestamp;
-    private String errorCode;
+    private String requestId;
 
     public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
-                .success(true)
+                .code("SUCCESS")
                 .message(message)
                 .data(data)
-                .timestamp(LocalDateTime.now())
+                .requestId(currentRequestId())
                 .build();
     }
 
@@ -36,10 +34,9 @@ public class ApiResponse<T> {
 
     public static <T> ApiResponse<T> error(String message, String errorCode) {
         return ApiResponse.<T>builder()
-                .success(false)
+                .code(errorCode == null || errorCode.isBlank() ? "ERROR" : errorCode)
                 .message(message)
-                .errorCode(errorCode)
-                .timestamp(LocalDateTime.now())
+                .requestId(currentRequestId())
                 .build();
     }
 
@@ -50,5 +47,9 @@ public class ApiResponse<T> {
     public ApiResponse<T> withData(T data) {
         this.data = data;
         return this;
+    }
+
+    private static String currentRequestId() {
+        return MDC.get("correlationId");
     }
 }

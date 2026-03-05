@@ -75,6 +75,18 @@ public class ClaimController {
         return ResponseEntity.ok(StandardResponse.success(responses));
     }
 
+    @GetMapping("/my-claims/search")
+    @PreAuthorize("hasRole('POLICYHOLDER')")
+    public ResponseEntity<StandardResponse<List<ClaimResponse>>> searchMyClaims(
+            @RequestAttribute("userId") Long claimantId,
+            @RequestParam(name = "query", required = false) String query,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "fromDate", required = false) String fromDate,
+            @RequestParam(name = "toDate", required = false) String toDate) {
+        List<ClaimResponse> responses = claimService.searchMyClaims(claimantId, query, status, fromDate, toDate);
+        return ResponseEntity.ok(StandardResponse.success(responses));
+    }
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADJUSTER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<StandardResponse<Page<ClaimResponse>>> getClaims(

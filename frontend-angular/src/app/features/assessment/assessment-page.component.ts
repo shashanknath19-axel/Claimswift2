@@ -6,10 +6,13 @@ import { finalize } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 
+import { Document } from '../../core/models/document.model';
+import { DocumentService } from '../../core/services/document.service';
 import {
   AssessmentCreateRequest,
   AssessmentDecisionRequest,
@@ -25,6 +28,7 @@ import {
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule
@@ -63,7 +67,7 @@ import {
           </mat-form-field>
 
           <div class="card-actions">
-            <button mat-flat-button color="primary" [disabled]="assessmentForm.invalid || !claimId">
+            <button mat-flat-button color="primary" [disabled]="assessmentForm.invalid || !claimId || hasFinalDecision">
               Save Assessment
             </button>
           </div>
@@ -97,11 +101,53 @@ import {
           </mat-form-field>
 
           <div class="card-actions">
-            <button mat-flat-button color="primary" [disabled]="decisionForm.invalid || !assessmentId">
+            <button mat-flat-button color="primary" [disabled]="decisionForm.invalid || !assessmentId || hasFinalDecision">
               Submit Decision
             </button>
           </div>
         </form>
+      </mat-card>
+      </div>
+
+      <div class="col-12">
+      <mat-card class="claim-card">
+        <div class="card-header"><h2>Claim Documents</h2></div>
+        <div class="card-body">
+          <div class="loading-container" *ngIf="loadingDocuments">
+            <mat-spinner diameter="28"></mat-spinner>
+            <p>Loading claim documents...</p>
+          </div>
+
+          <div class="empty-state compact" *ngIf="!loadingDocuments && !documents.length">
+            <mat-icon class="empty-icon">description</mat-icon>
+            <h3>No documents uploaded for this claim yet</h3>
+          </div>
+
+          <div class="table-wrap" *ngIf="!loadingDocuments && documents.length">
+            <table class="data-table table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>File</th>
+                  <th>Type</th>
+                  <th>Size</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let document of documents">
+                  <td>{{ document.originalFileName || document.fileName }}</td>
+                  <td>{{ document.documentType }}</td>
+                  <td>{{ document.fileSize | number }} bytes</td>
+                  <td class="action-buttons">
+                    <button mat-icon-button (click)="downloadDocument(document)">
+                      <mat-icon>download</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </mat-card>
       </div>
     </section>
@@ -121,8 +167,11 @@ import {
 })
 export class AssessmentPageComponent implements OnInit {
   loading = false;
+  loadingDocuments = false;
   claimId: number | null = null;
   assessmentId: number | null = null;
+  hasFinalDecision = false;
+  documents: Document[] = [];
 
   readonly assessmentForm = this.fb.group({
     assessedAmount: [0, [Validators.required, Validators.min(1)]],
@@ -140,7 +189,8 @@ export class AssessmentPageComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly assessmentService: AssessmentService
+    private readonly assessmentService: AssessmentService,
+    private readonly documentService: DocumentService
   ) {}
 
   ngOnInit(): void {
@@ -149,12 +199,15 @@ export class AssessmentPageComponent implements OnInit {
       return;
     }
 
+    this.loadClaimDocuments(this.claimId);
+
     this.loading = true;
     this.assessmentService.getByClaimId(this.claimId, true)
       .pipe(finalize(() => { this.loading = false; }))
       .subscribe(result => {
-        const data = result as { id?: number; assessedAmount?: number } | null;
+        const data = result as { id?: number; assessedAmount?: number; decision?: string | null } | null;
         this.assessmentId = data?.id ?? null;
+        this.hasFinalDecision = !!data?.decision && data.decision !== 'PENDING_REVIEW';
         if (data?.assessedAmount) {
           this.assessmentForm.patchValue({ assessedAmount: data.assessedAmount });
           this.decisionForm.patchValue({ finalAmount: data.assessedAmount });
@@ -163,7 +216,7 @@ export class AssessmentPageComponent implements OnInit {
   }
 
   submitAssessment(): void {
-    if (!this.claimId || this.assessmentForm.invalid) {
+    if (!this.claimId || this.assessmentForm.invalid || this.hasFinalDecision) {
       return;
     }
 
@@ -184,7 +237,7 @@ export class AssessmentPageComponent implements OnInit {
   }
 
   submitDecision(): void {
-    if (!this.assessmentId || this.decisionForm.invalid) {
+    if (!this.assessmentId || this.decisionForm.invalid || this.hasFinalDecision) {
       return;
     }
 
@@ -200,5 +253,25 @@ export class AssessmentPageComponent implements OnInit {
         this.router.navigate(['/claims', this.claimId, 'tracking']);
       }
     });
+  }
+
+  downloadDocument(document: Document): void {
+    this.documentService.downloadDocument(document.id).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = document.originalFileName || document.fileName;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }
+
+  private loadClaimDocuments(claimId: number): void {
+    this.loadingDocuments = true;
+    this.documentService.getDocumentsByClaim(claimId, true)
+      .pipe(finalize(() => { this.loadingDocuments = false; }))
+      .subscribe(documents => {
+        this.documents = documents;
+      });
   }
 }

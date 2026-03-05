@@ -126,10 +126,11 @@ import { PaymentService } from '../../core/services/payment.service';
           <h2>Adjuster Actions</h2>
         </div>
         <div class="card-body action-row d-flex flex-wrap gap-2">
-          <button mat-stroked-button (click)="updateStatus('UNDER_REVIEW')">Mark Under Review</button>
-          <button mat-flat-button color="primary" (click)="approveClaim()">Approve</button>
-          <button mat-flat-button color="warn" (click)="rejectClaim()">Disapprove</button>
-          <button mat-stroked-button (click)="adjustClaim()">Adjust Amount</button>
+          <button mat-stroked-button (click)="updateStatus('UNDER_REVIEW')" *ngIf="canMoveTo('UNDER_REVIEW')">Mark Under Review</button>
+          <button mat-flat-button color="primary" (click)="approveClaim()" *ngIf="canMoveTo('APPROVED')">Approve</button>
+          <button mat-flat-button color="warn" (click)="rejectClaim()" *ngIf="canMoveTo('REJECTED')">Disapprove</button>
+          <button mat-stroked-button (click)="adjustClaim()" *ngIf="canMoveTo('ADJUSTED')">Adjust Amount</button>
+          <span class="text-muted small" *ngIf="!hasWorkflowActions">No workflow actions available</span>
         </div>
       </mat-card>
     </ng-container>
@@ -243,7 +244,7 @@ export class ClaimDetailPageComponent implements OnInit {
   }
 
   updateStatus(status: ClaimStatus): void {
-    if (!this.claim) {
+    if (!this.claim || !this.canMoveTo(status)) {
       return;
     }
 
@@ -261,7 +262,7 @@ export class ClaimDetailPageComponent implements OnInit {
   }
 
   adjustClaim(): void {
-    if (!this.claim) {
+    if (!this.claim || !this.canMoveTo('ADJUSTED')) {
       return;
     }
 
@@ -307,6 +308,20 @@ export class ClaimDetailPageComponent implements OnInit {
     return status.toLowerCase().replace(/_/g, '-');
   }
 
+  canMoveTo(nextStatus: ClaimStatus): boolean {
+    if (!this.claim) {
+      return false;
+    }
+    return this.getAllowedTransitions(this.claim.status).includes(nextStatus);
+  }
+
+  get hasWorkflowActions(): boolean {
+    return this.canMoveTo('UNDER_REVIEW')
+      || this.canMoveTo('APPROVED')
+      || this.canMoveTo('REJECTED')
+      || this.canMoveTo('ADJUSTED');
+  }
+
   private loadRelatedData(claimId: number): void {
     this.documentService.getDocumentsByClaim(claimId, true).subscribe(documents => {
       this.documents = documents;
@@ -315,5 +330,20 @@ export class ClaimDetailPageComponent implements OnInit {
     this.paymentService.getByClaimId(claimId, true).subscribe(payments => {
       this.payments = payments;
     });
+  }
+
+  private getAllowedTransitions(currentStatus: ClaimStatus): ClaimStatus[] {
+    const transitions: Record<ClaimStatus, ClaimStatus[]> = {
+      SUBMITTED: ['UNDER_REVIEW', 'CANCELLED'],
+      UNDER_REVIEW: ['APPROVED', 'REJECTED', 'ADJUSTED', 'CANCELLED'],
+      ADJUSTED: ['APPROVED', 'REJECTED', 'CANCELLED'],
+      APPROVED: ['PAID', 'PAYMENT_FAILED'],
+      PAYMENT_FAILED: ['PAID', 'CANCELLED'],
+      REJECTED: [],
+      PAID: [],
+      CANCELLED: []
+    };
+
+    return transitions[currentStatus] ?? [];
   }
 }

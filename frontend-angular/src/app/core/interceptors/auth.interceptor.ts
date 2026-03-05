@@ -27,7 +27,16 @@ export const authInterceptor: HttpInterceptorFn = (
   return next(authReq).pipe(
     catchError(error => {
       if (error.status === 401) {
-        authService.clearSessionAndRedirect();
+        const errorCode = String(error?.error?.code ?? error?.error?.errorCode ?? '').toUpperCase();
+        const message = String(error?.error?.message ?? error?.message ?? '').toLowerCase();
+        const tokenExpired = errorCode.includes('TOKEN_EXPIRED') || message.includes('token expired');
+        const invalidToken = errorCode.includes('INVALID_TOKEN') || message.includes('invalid token') || message.includes('jwt');
+        const authError = errorCode.includes('AUTH_ERROR');
+        const shouldLogout = tokenExpired || invalidToken || authError;
+
+        if (shouldLogout) {
+          authService.clearSessionAndRedirect();
+        }
       }
       return throwError(() => error);
     })

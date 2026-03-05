@@ -24,6 +24,8 @@ public class SecurityConfig {
                                 "/actuator/metrics/**",
                                 "/fallback/**"
                         ).permitAll()
+                        .pathMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh", "/api/auth/health")
+                        .permitAll()
                         .pathMatchers("/api/auth/**").permitAll()
                         .pathMatchers("/ws/**").permitAll()
                         .pathMatchers(

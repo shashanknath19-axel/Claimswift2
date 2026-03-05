@@ -60,8 +60,18 @@ import { ClaimService } from '../../core/services/claim.service';
 
           <mat-form-field appearance="outline">
             <mat-label>Search</mat-label>
-            <input matInput formControlName="query" placeholder="Claim #, policy, vehicle" />
+            <input matInput formControlName="query" placeholder="Claim #, policy, holder name/phone" />
             <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>From Date</mat-label>
+            <input matInput type="date" formControlName="fromDate" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>To Date</mat-label>
+            <input matInput type="date" formControlName="toDate" />
           </mat-form-field>
         </form>
 
@@ -166,7 +176,7 @@ import { ClaimService } from '../../core/services/claim.service';
 
     .filters {
       display: grid;
-      grid-template-columns: 16rem minmax(18rem, 26rem);
+      grid-template-columns: 14rem minmax(14rem, 1fr) 11rem 11rem;
       gap: 0.75rem;
     }
 
@@ -189,7 +199,9 @@ export class ClaimsListPageComponent implements OnInit {
 
   readonly filterForm = this.fb.group({
     status: [''],
-    query: ['']
+    query: [''],
+    fromDate: [''],
+    toDate: ['']
   });
 
   constructor(
@@ -236,6 +248,8 @@ export class ClaimsListPageComponent implements OnInit {
       .subscribe(() => this.loadClaims());
 
     this.filterForm.controls.status.valueChanges.subscribe(() => this.loadClaims());
+    this.filterForm.controls.fromDate.valueChanges.subscribe(() => this.loadClaims());
+    this.filterForm.controls.toDate.valueChanges.subscribe(() => this.loadClaims());
     this.loadClaims();
   }
 
@@ -244,12 +258,35 @@ export class ClaimsListPageComponent implements OnInit {
 
     const query = this.filterForm.controls.query.value?.trim() ?? '';
     const status = this.filterForm.controls.status.value ?? '';
+    const fromDate = this.filterForm.controls.fromDate.value ?? '';
+    const toDate = this.filterForm.controls.toDate.value ?? '';
     const normalizedQuery = query.toLowerCase();
+
+    if (this.isPolicyholder && (query || status || fromDate || toDate)) {
+      this.claimService.searchMyClaims({
+        query,
+        status,
+        fromDate,
+        toDate
+      })
+        .pipe(finalize(() => { this.loading = false; }))
+        .subscribe(claims => { this.claims = this.sortClaimsForRole(claims); });
+      return;
+    }
 
     if (query) {
       const currentUserId = this.authService.currentUser?.id;
       const applyFilters = (claims: Claim[], applyQueryFilter: boolean = false): void => {
-        let filtered = status ? claims.filter(claim => claim.status === status) : claims;
+        let filtered = claims;
+        if (status) {
+          filtered = filtered.filter(claim => claim.status === status);
+        }
+        if (fromDate) {
+          filtered = filtered.filter(claim => (claim.incidentDate ?? '') >= fromDate);
+        }
+        if (toDate) {
+          filtered = filtered.filter(claim => (claim.incidentDate ?? '') <= toDate);
+        }
         if (applyQueryFilter) {
           filtered = filtered.filter(claim => this.matchesClaimQuery(claim, normalizedQuery));
         }
@@ -258,13 +295,6 @@ export class ClaimsListPageComponent implements OnInit {
         }
         this.claims = this.sortClaimsForRole(filtered);
       };
-
-      if (this.isPolicyholder) {
-        this.claimService.getMyClaims()
-          .pipe(finalize(() => { this.loading = false; }))
-          .subscribe(claims => applyFilters(claims, true));
-        return;
-      }
 
       const isClaimNumberQuery = /^CLM[-A-Z0-9]+$/i.test(query);
       if (isClaimNumberQuery) {
@@ -288,11 +318,14 @@ export class ClaimsListPageComponent implements OnInit {
     }
 
     if (this.isPolicyholder) {
-      this.claimService.getMyClaims()
+      this.claimService.searchMyClaims({
+        status,
+        fromDate,
+        toDate
+      })
         .pipe(finalize(() => { this.loading = false; }))
         .subscribe(claims => {
-          const filtered = status ? claims.filter(claim => claim.status === status) : claims;
-          this.claims = this.sortClaimsForRole(filtered);
+          this.claims = this.sortClaimsForRole(claims);
         });
       return;
     }
@@ -372,6 +405,8 @@ export class ClaimsListPageComponent implements OnInit {
       claim.policyNumber,
       claim.vehicleRegistration,
       claim.vehicleRegistrationNumber,
+      claim.policyholderName,
+      claim.policyholderPhone,
       claim.vehicleMake,
       claim.vehicleModel,
       claim.incidentLocation,

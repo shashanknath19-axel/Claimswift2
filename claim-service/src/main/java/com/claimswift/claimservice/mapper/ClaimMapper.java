@@ -39,6 +39,8 @@ public class ClaimMapper {
         response.setClaimNumber(claim.getClaimNumber());
         response.setPolicyNumber(claim.getPolicyNumber());
         response.setPolicyholderId(claim.getClaimantId());
+        response.setPolicyholderName(claim.getClaimantName());
+        response.setPolicyholderPhone(claim.getClaimantPhone());
         response.setVehicleRegistrationNumber(claim.getVehicleRegistration());
         response.setVehicleMake(claim.getVehicleMake());
         response.setVehicleModel(claim.getVehicleModel());

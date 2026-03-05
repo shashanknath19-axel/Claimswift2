@@ -28,120 +28,68 @@ import { AuthService } from '../../core/services/auth.service';
   ],
   template: `
     <section class="auth-shell">
-      <mat-card class="auth-card fade-in">
-        <header class="auth-header">
-          <p class="eyebrow">Secure Access</p>
-          <h1>Sign In</h1>
-          <p>Use your ClaimSwift account to continue.</p>
-        </header>
+      <div class="auth-grid fade-in">
+        <aside class="auth-brand-pane">
+          <span class="auth-brand-badge">
+            <mat-icon>verified_user</mat-icon>
+            Secure Access
+          </span>
+          <h2>Welcome back to ClaimSwift</h2>
+          <p>Access your claims workspace with enterprise-grade authentication and real-time workflow visibility.</p>
+          <ul class="auth-feature-list">
+            <li>Track claims in real time</li>
+            <li>Unified notifications and tasks</li>
+            <li>Auditable request tracing</li>
+          </ul>
+        </aside>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form row g-2">
-          <div class="col-12">
-            <mat-form-field appearance="outline">
-              <mat-label>Username or Email</mat-label>
-              <input matInput formControlName="usernameOrEmail" />
-              <mat-icon matSuffix>person</mat-icon>
-            </mat-form-field>
-          </div>
+        <mat-card class="auth-form-pane border-0 rounded-0 shadow-none">
+          <header class="auth-header">
+            <p class="eyebrow">Secure Access</p>
+            <h1>Sign In</h1>
+            <p>Use your ClaimSwift account to continue.</p>
+          </header>
 
-          <div class="col-12">
-            <mat-form-field appearance="outline">
-              <mat-label>Password</mat-label>
-              <input matInput type="password" formControlName="password" />
-              <mat-icon matSuffix>lock</mat-icon>
-            </mat-form-field>
-          </div>
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form row g-2">
+            <div class="col-12">
+              <mat-form-field appearance="outline">
+                <mat-label>Username or Email</mat-label>
+                <input matInput formControlName="usernameOrEmail" autocomplete="username" />
+                <mat-icon matSuffix>person</mat-icon>
+              </mat-form-field>
+            </div>
 
-          <div class="col-12">
-            <button mat-flat-button color="primary" class="w-100" [disabled]="loginForm.invalid || isSubmitting">
-              <span *ngIf="!isSubmitting">Login</span>
-              <span class="btn-loading" *ngIf="isSubmitting">
-                <mat-spinner diameter="18"></mat-spinner>
-                Signing in
-              </span>
-            </button>
-          </div>
-        </form>
+            <div class="col-12">
+              <mat-form-field appearance="outline">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" formControlName="password" autocomplete="current-password" />
+                <mat-icon matSuffix>lock</mat-icon>
+              </mat-form-field>
+            </div>
 
-        <footer class="auth-footer">
-          <span>New to ClaimSwift?</span>
-          <a routerLink="/register">Create account</a>
-        </footer>
-      </mat-card>
+            <div class="col-12">
+              <button mat-flat-button color="primary" class="w-100 full-action" [disabled]="loginForm.invalid || isSubmitting">
+                <span *ngIf="!isSubmitting">Login</span>
+                <span class="btn-loading" *ngIf="isSubmitting">
+                  <mat-spinner diameter="18"></mat-spinner>
+                  Signing in
+                </span>
+              </button>
+            </div>
+          </form>
+
+          <footer class="auth-footer">
+            <span>New to ClaimSwift?</span>
+            <a routerLink="/register">Create account</a>
+          </footer>
+        </mat-card>
+      </div>
     </section>
   `,
   styles: [`
-    .auth-shell {
-      min-height: calc(100vh - 10rem);
-      display: grid;
-      place-items: center;
-      padding: 1rem;
-    }
-
-    .auth-card {
-      width: min(100%, 32rem);
-      border-radius: 1.2rem;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
-    }
-
-    .auth-header {
-      padding: 2rem 2rem 1rem;
-      background: linear-gradient(140deg, #f2f8ff 0%, #edf8f5 100%);
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .eyebrow {
-      margin: 0;
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    h1 {
-      margin: 0.4rem 0;
-      font-size: 1.7rem;
-      color: #10324b;
-    }
-
-    .auth-header p {
-      margin: 0;
-      color: var(--text-secondary);
-    }
-
-    .auth-form {
-      padding: 1.5rem 2rem;
-      display: grid;
-      gap: 0.8rem;
-    }
-
-    .auth-form button {
-      margin-top: 0.3rem;
-      min-height: 2.8rem;
-      border-radius: 0.7rem;
-    }
-
-    .btn-loading {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.55rem;
-    }
-
-    .auth-footer {
-      padding: 0 2rem 2rem;
-      display: flex;
-      gap: 0.5rem;
-      color: var(--text-secondary);
-      font-size: 0.93rem;
-    }
-
-    .auth-footer a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 600;
+    .full-action {
+      min-height: 2.9rem;
+      border-radius: 0.78rem;
     }
   `]
 })

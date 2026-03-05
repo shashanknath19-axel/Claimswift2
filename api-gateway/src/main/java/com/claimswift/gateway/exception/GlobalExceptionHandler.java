@@ -1,5 +1,9 @@
 package com.claimswift.gateway.exception;
 
+import com.claimswift.gateway.filter.CorrelationIdFilter;
+import com.claimswift.gateway.util.ApiResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
@@ -14,7 +18,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 
 /**
  * Global Exception Handler for API Gateway
@@ -23,6 +26,8 @@ import java.time.LocalDateTime;
 @Component
 @Order(-1)
 public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
@@ -36,7 +41,8 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        String errorBody = createErrorResponse(ex, status);
+        String requestId = exchange.getRequest().getHeaders().getFirst(CorrelationIdFilter.CORRELATION_ID_HEADER);
+        String errorBody = createErrorResponse(ex, status, requestId);
         DataBuffer buffer = response.bufferFactory().wrap(errorBody.getBytes(StandardCharsets.UTF_8));
 
         log.error("Gateway error: {}", ex.getMessage(), ex);
@@ -51,12 +57,14 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
-    private String createErrorResponse(Throwable ex, HttpStatus status) {
-        return String.format(
-                "{\"success\":false,\"message\":\"%s\",\"errorCode\":\"%s\",\"timestamp\":\"%s\"}",
-                ex.getMessage() != null ? ex.getMessage().replace("\"", "'") : "Internal Server Error",
-                status.name(),
-                LocalDateTime.now().toString()
-        );
+    private String createErrorResponse(Throwable ex, HttpStatus status, String requestId) {
+        String message = ex.getMessage() != null ? ex.getMessage() : "Internal server error";
+        ApiResponse<Void> payload = ApiResponse.error(message, status.name(), requestId);
+        try {
+            return objectMapper.writeValueAsString(payload);
+        } catch (JsonProcessingException jsonEx) {
+            log.error("Failed to serialize gateway error response", jsonEx);
+            return "{\"code\":\"INTERNAL_ERROR\",\"message\":\"Unexpected error\",\"data\":null,\"requestId\":\"" + requestId + "\"}";
+        }
     }
 }

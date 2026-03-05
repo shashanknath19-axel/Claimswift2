@@ -19,6 +19,25 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    openfeign:
+      client:
+        config:
+          auth-service:
+            connectTimeout: 1000
+            readTimeout: 2000
+          reporting-service:
+            connectTimeout: 1000
+            readTimeout: 2000
+          notification-service:
+            connectTimeout: 1000
+            readTimeout: 2000
+          assessment-service:
+            connectTimeout: 1000
+            readTimeout: 2000
+          default:
+            connectTimeout: 1000
+            readTimeout: 2000
 
 claim:
   claim-number-prefix: CLM

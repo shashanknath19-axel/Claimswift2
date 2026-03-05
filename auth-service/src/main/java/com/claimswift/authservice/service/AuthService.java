@@ -45,8 +45,8 @@ public class AuthService {
             throw new RuntimeException("Email already exists");
         }
 
-        Role role = roleRepository.findByName(Role.RoleName.valueOf(request.getRole()))
-                .orElseThrow(() -> new RuntimeException("Role not found: " + request.getRole()));
+        Role policyholderRole = roleRepository.findByName(Role.RoleName.ROLE_POLICYHOLDER)
+                .orElseThrow(() -> new RuntimeException("Default policyholder role not found"));
 
         User user = User.builder()
                 .username(request.getUsername())
@@ -55,7 +55,7 @@ public class AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
-                .roles(Set.of(role))
+                .roles(Set.of(policyholderRole))
                 .status(User.UserStatus.ACTIVE)
                 .emailVerified(false)
                 .build();
@@ -71,6 +71,57 @@ public class AuthService {
                 .expiresIn(jwtTokenProvider.getExpirationTime())
                 .user(mapToUserDTO(savedUser))
                 .build();
+    }
+
+    @Transactional
+    public UserDTO createInternalUser(AdminCreateUserRequest request, String actorUsername) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
+        Set<Role> roles = resolveRoles(request.getRoles());
+        User.UserStatus status = resolveStatus(request.getStatus(), User.UserStatus.ACTIVE);
+
+        User user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .phoneNumber(request.getPhoneNumber())
+                .roles(roles)
+                .status(status)
+                .emailVerified(true)
+                .build();
+
+        User saved = userRepository.save(user);
+        log.info("Admin {} created internal user {} with roles {}", actorUsername, saved.getUsername(), request.getRoles());
+        return mapToUserDTO(saved);
+    }
+
+    @Transactional
+    public UserDTO updateUserRoles(Long userId, Set<String> roleNames, String actorUsername) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Set<Role> roles = resolveRoles(roleNames);
+        user.setRoles(roles);
+        User saved = userRepository.save(user);
+        log.info("Admin {} updated roles for user {} to {}", actorUsername, saved.getUsername(), roleNames);
+        return mapToUserDTO(saved);
+    }
+
+    @Transactional
+    public UserDTO updateUserStatus(Long userId, String status, String actorUsername) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User.UserStatus resolved = resolveStatus(status, user.getStatus());
+        user.setStatus(resolved);
+        User saved = userRepository.save(user);
+        log.info("Admin {} updated status for user {} to {}", actorUsername, saved.getUsername(), resolved);
+        return mapToUserDTO(saved);
     }
 
     @Transactional
@@ -164,5 +215,36 @@ public class AuthService {
                 .lastLoginAt(user.getLastLoginAt())
                 .createdAt(user.getCreatedAt())
                 .build();
+    }
+
+    private Set<Role> resolveRoles(Set<String> roleNames) {
+        return roleNames.stream()
+                .map(this::parseRoleName)
+                .map(roleName -> roleRepository.findByName(roleName)
+                        .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName)))
+                .collect(Collectors.toSet());
+    }
+
+    private Role.RoleName parseRoleName(String roleName) {
+        String normalized = roleName == null ? "" : roleName.trim().toUpperCase();
+        if (!normalized.startsWith("ROLE_")) {
+            normalized = "ROLE_" + normalized;
+        }
+        try {
+            return Role.RoleName.valueOf(normalized);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Invalid role: " + roleName);
+        }
+    }
+
+    private User.UserStatus resolveStatus(String status, User.UserStatus defaultStatus) {
+        if (status == null || status.isBlank()) {
+            return defaultStatus;
+        }
+        try {
+            return User.UserStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Invalid status: " + status);
+        }
     }
 }

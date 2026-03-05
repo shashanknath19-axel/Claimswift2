@@ -1,8 +1,12 @@
 export interface ApiResponse<T> {
-  success: boolean;
+  code: string;
   message: string;
   data: T;
-  timestamp: string;
+  requestId?: string;
+  // Backward-compatible fields for transitional payloads.
+  success?: boolean;
+  errorCode?: string;
+  timestamp?: string;
   path?: string;
 }
 
@@ -16,9 +20,11 @@ export interface PageResponse<T> {
 }
 
 export interface ApiError {
-  success: false;
+  code?: string;
   message: string;
-  timestamp: string;
-  path: string;
+  requestId?: string;
+  timestamp?: string;
+  path?: string;
+  errorCode?: string;
   errors?: string[];
 }

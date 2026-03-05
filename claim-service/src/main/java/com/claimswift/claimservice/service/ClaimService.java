@@ -1,6 +1,7 @@
 package com.claimswift.claimservice.service;
 
 import com.claimswift.claimservice.client.AssessmentServiceClient;
+import com.claimswift.claimservice.client.AuthServiceClient;
 import com.claimswift.claimservice.client.NotificationServiceClient;
 import com.claimswift.claimservice.client.ReportingServiceClient;
 import com.claimswift.claimservice.dto.ClaimRequest;
@@ -36,6 +37,7 @@ public class ClaimService {
     private final ClaimRepository claimRepository;
     private final ClaimMapper claimMapper;
     private final AssessmentServiceClient assessmentServiceClient;
+    private final AuthServiceClient authServiceClient;
     private final ReportingServiceClient reportingServiceClient;
     private final NotificationServiceClient notificationServiceClient;
     private final Map<Claim.ClaimStatus, Set<Claim.ClaimStatus>> allowedTransitions = buildAllowedTransitions();
@@ -45,6 +47,7 @@ public class ClaimService {
         Claim claim = claimMapper.toEntity(request);
         claim.setClaimNumber(generateClaimNumber());
         claim.setClaimantId(claimantId);
+        applyClaimantSnapshot(claim, username);
         claim.setStatus(Claim.ClaimStatus.SUBMITTED);
         claim.setCreatedBy(username);
         claim.setUpdatedBy(username);
@@ -229,6 +232,28 @@ public class ClaimService {
     }
 
     @Transactional(readOnly = true)
+    public List<ClaimResponse> searchMyClaims(
+            Long claimantId,
+            String query,
+            String status,
+            String fromDate,
+            String toDate
+    ) {
+        Claim.ClaimStatus parsedStatus = null;
+        if (status != null && !status.isBlank()) {
+            parsedStatus = Claim.ClaimStatus.valueOf(status.trim().toUpperCase());
+        }
+
+        return claimMapper.toResponseList(claimRepository.searchMyClaims(
+                claimantId,
+                normalizeQuery(query),
+                parsedStatus,
+                parseDate(fromDate),
+                parseDate(toDate)
+        ));
+    }
+
+    @Transactional(readOnly = true)
     public List<ClaimResponse> getAllClaims() {
         return claimMapper.toResponseList(claimRepository.findAll());
     }
@@ -333,5 +358,57 @@ public class ClaimService {
         transitions.put(Claim.ClaimStatus.PAID, EnumSet.noneOf(Claim.ClaimStatus.class));
         transitions.put(Claim.ClaimStatus.CANCELLED, EnumSet.noneOf(Claim.ClaimStatus.class));
         return transitions;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void applyClaimantSnapshot(Claim claim, String fallbackUsername) {
+        String claimantName = fallbackUsername;
+        String claimantPhone = null;
+        try {
+            Map<String, Object> envelope = authServiceClient.getCurrentUser();
+            if (envelope != null) {
+                Object dataObject = envelope.get("data");
+                if (dataObject instanceof Map<?, ?> dataMap) {
+                    String firstName = toTrimmedString(dataMap.get("firstName"));
+                    String lastName = toTrimmedString(dataMap.get("lastName"));
+                    String fullName = (firstName + " " + lastName).trim();
+                    if (!fullName.isBlank()) {
+                        claimantName = fullName;
+                    }
+                    claimantPhone = toTrimmedString(dataMap.get("phoneNumber"));
+                }
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to fetch claimant profile snapshot: {}", ex.getMessage());
+        }
+        claim.setClaimantName(claimantName);
+        claim.setClaimantPhone(claimantPhone);
+    }
+
+    private String toTrimmedString(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String resolved = String.valueOf(value).trim();
+        return resolved.isBlank() ? null : resolved;
+    }
+
+    private String normalizeQuery(String query) {
+        if (query == null) {
+            return null;
+        }
+        String trimmed = query.trim().toLowerCase();
+        return trimmed.isBlank() ? null : trimmed;
+    }
+
+    private java.time.LocalDate parseDate(String dateValue) {
+        if (dateValue == null || dateValue.isBlank()) {
+            return null;
+        }
+        try {
+            return java.time.LocalDate.parse(dateValue.trim());
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Invalid date format. Use YYYY-MM-DD.");
+        }
     }
 }

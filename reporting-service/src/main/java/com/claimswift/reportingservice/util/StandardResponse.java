@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import org.slf4j.MDC;
 
 /**
  * Standard API Response Wrapper
@@ -19,36 +18,34 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StandardResponse<T> {
     
-    private boolean success;
+    private String code;
     private String message;
     private T data;
-    private LocalDateTime timestamp;
-    private String errorCode;
-    private String correlationId;
+    private String requestId;
 
     public static <T> StandardResponse<T> success(T data) {
         return StandardResponse.<T>builder()
-                .success(true)
+                .code("SUCCESS")
                 .message("Success")
                 .data(data)
-                .timestamp(LocalDateTime.now())
+                .requestId(currentRequestId())
                 .build();
     }
 
     public static <T> StandardResponse<T> success(String message, T data) {
         return StandardResponse.<T>builder()
-                .success(true)
+                .code("SUCCESS")
                 .message(message)
                 .data(data)
-                .timestamp(LocalDateTime.now())
+                .requestId(currentRequestId())
                 .build();
     }
 
     public static <T> StandardResponse<T> error(String message) {
         return StandardResponse.<T>builder()
-                .success(false)
+                .code("ERROR")
                 .message(message)
-                .timestamp(LocalDateTime.now())
+                .requestId(currentRequestId())
                 .build();
     }
 
@@ -58,21 +55,26 @@ public class StandardResponse<T> {
 
     public static <T> StandardResponse<T> error(String message, String errorCode, T data) {
         return StandardResponse.<T>builder()
-                .success(false)
+                .code(errorCode == null || errorCode.isBlank() ? "ERROR" : errorCode)
                 .message(message)
                 .data(data)
-                .errorCode(errorCode)
-                .timestamp(LocalDateTime.now())
+                .requestId(currentRequestId())
                 .build();
     }
 
     public static <T> StandardResponse<T> error(String message, String errorCode, String correlationId) {
         return StandardResponse.<T>builder()
-                .success(false)
+                .code(errorCode == null || errorCode.isBlank() ? "ERROR" : errorCode)
                 .message(message)
-                .errorCode(errorCode)
-                .correlationId(correlationId)
-                .timestamp(LocalDateTime.now())
+                .requestId(correlationId)
                 .build();
+    }
+
+    public static <T> StandardResponse<T> error(String message, String errorCode, T data, int statusCode) {
+        return error(message, errorCode, data);
+    }
+
+    private static String currentRequestId() {
+        return MDC.get("correlationId");
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -72,7 +73,11 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     private Mono<Void> onError(ServerWebExchange exchange, HttpStatus httpStatus) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(httpStatus);
-        return response.setComplete();
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        String requestId = exchange.getRequest().getHeaders().getFirst("X-Correlation-ID");
+        String body = "{\"code\":\"" + httpStatus.name() + "\",\"message\":\"Unauthorized\",\"data\":null,\"requestId\":\""
+                + (requestId == null ? "" : requestId) + "\"}";
+        return response.writeWith(Mono.just(response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8))));
     }
 
     private String getAuthHeader(ServerHttpRequest request) {

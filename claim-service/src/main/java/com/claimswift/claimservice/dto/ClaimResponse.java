@@ -24,6 +24,7 @@ public class ClaimResponse {
     private Long policyholderId;
     private String policyholderName;
     private String policyholderEmail;
+    private String policyholderPhone;
     
     // Vehicle Information
     private String vehicleRegistrationNumber;

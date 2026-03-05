@@ -13,7 +13,18 @@ import java.time.LocalDateTime;
  * Claim Entity - Represents an insurance claim
  */
 @Entity
-@Table(name = "claims")
+@Table(
+        name = "claims",
+        indexes = {
+                @Index(name = "idx_claim_claim_number", columnList = "claim_number"),
+                @Index(name = "idx_claim_policy_number", columnList = "policy_number"),
+                @Index(name = "idx_claim_status", columnList = "status"),
+                @Index(name = "idx_claim_incident_date", columnList = "incident_date"),
+                @Index(name = "idx_claim_claimant_name", columnList = "claimant_name"),
+                @Index(name = "idx_claim_claimant_phone", columnList = "claimant_phone"),
+                @Index(name = "idx_claim_claimant_status_date", columnList = "claimant_id,status,incident_date")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,6 +44,12 @@ public class Claim {
 
     @Column(name = "claimant_id", nullable = false)
     private Long claimantId;
+
+    @Column(name = "claimant_name", length = 120)
+    private String claimantName;
+
+    @Column(name = "claimant_phone", length = 20)
+    private String claimantPhone;
 
     @Column(name = "vehicle_registration", nullable = false, length = 20)
     private String vehicleRegistration;

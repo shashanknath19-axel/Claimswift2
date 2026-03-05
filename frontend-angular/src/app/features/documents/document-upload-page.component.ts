@@ -3,7 +3,8 @@ import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { EMPTY, Observable, of } from 'rxjs';
+import { finalize, map, switchMap } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,6 +14,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 
 import { Document } from '../../core/models/document.model';
+import { ClaimService } from '../../core/services/claim.service';
 import { DocumentService } from '../../core/services/document.service';
 
 @Component({
@@ -43,8 +45,18 @@ import { DocumentService } from '../../core/services/document.service';
         <div class="row g-3 mb-1">
           <div class="col-12 col-md-4">
             <mat-form-field appearance="outline">
-              <mat-label>Claim ID</mat-label>
-              <input matInput type="number" formControlName="claimId" />
+              <mat-label>Claim ID / Number</mat-label>
+              <input matInput type="text" formControlName="claimReference" />
+              <mat-hint>Use claim ID (e.g. 123) or claim number (e.g. CLM-8DD4B054)</mat-hint>
+              <mat-error *ngIf="form.controls.claimReference.hasError('required')">
+                Claim ID or claim number is required.
+              </mat-error>
+              <mat-error *ngIf="form.controls.claimReference.hasError('invalidClaimReference')">
+                Enter a valid positive claim ID or a claim number.
+              </mat-error>
+              <mat-error *ngIf="form.controls.claimReference.hasError('claimNotFound')">
+                Claim not found for the entered claim number.
+              </mat-error>
             </mat-form-field>
           </div>
 
@@ -121,7 +133,7 @@ export class DocumentUploadPageComponent implements OnInit {
   documentTypes = this.documentService.getDocumentTypes();
 
   readonly form = this.fb.group({
-    claimId: [null as number | null, [Validators.required, Validators.min(1)]],
+    claimReference: ['', Validators.required],
     documentType: ['CLAIM_FORM', Validators.required],
     description: ['']
   });
@@ -130,17 +142,22 @@ export class DocumentUploadPageComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
+    private readonly claimService: ClaimService,
     private readonly documentService: DocumentService
   ) {}
 
   private returnTo: string = '/documents';
 
   ngOnInit(): void {
-    const claimId = Number(this.route.snapshot.queryParamMap.get('claimId'));
+    const claimIdParam = this.route.snapshot.queryParamMap.get('claimId');
+    const claimNumberParam = this.route.snapshot.queryParamMap.get('claimNumber');
     const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
 
+    const claimId = Number(claimIdParam);
     if (claimId > 0) {
-      this.form.patchValue({ claimId });
+      this.form.patchValue({ claimReference: String(claimId) });
+    } else if (claimNumberParam) {
+      this.form.patchValue({ claimReference: claimNumberParam });
     }
     if (returnTo) {
       this.returnTo = returnTo;
@@ -159,10 +176,10 @@ export class DocumentUploadPageComponent implements OnInit {
 
     const lowerName = file.name.toLowerCase();
     const isPdfByName = lowerName.endsWith('.pdf');
-    const isPdfByType = file.type === 'application/pdf' || file.type === 'application/x-pdf' || file.type === '';
+    const isPdfByType = file.type === 'application/pdf' || file.type === 'application/x-pdf';
     if (!isPdfByName || !isPdfByType) {
       this.selectedFile = null;
-      this.fileError = 'Only PDF documents are allowed.';
+      this.fileError = 'Only PDF documents are allowed. Please select a valid .pdf file.';
       input.value = '';
       return;
     }
@@ -176,16 +193,22 @@ export class DocumentUploadPageComponent implements OnInit {
     }
 
     const value = this.form.getRawValue();
+    const claimReference = (value.claimReference ?? '').trim();
+    this.form.controls.claimReference.setErrors(null);
+
     this.isSubmitting = true;
     this.uploadProgress = 0;
 
-    this.documentService.uploadDocument({
-      claimId: value.claimId as number,
-      documentType: value.documentType as Document['documentType'],
-      description: value.description || undefined,
-      file: this.selectedFile
-    })
-      .pipe(finalize(() => { this.isSubmitting = false; }))
+    this.resolveClaimId(claimReference)
+      .pipe(
+        switchMap(claimId => this.documentService.uploadDocument({
+          claimId,
+          documentType: value.documentType as Document['documentType'],
+          description: value.description || undefined,
+          file: this.selectedFile as File
+        })),
+        finalize(() => { this.isSubmitting = false; })
+      )
       .subscribe(event => {
         if (event.type === HttpEventType.UploadProgress) {
           const total = event.total ?? event.loaded;
@@ -196,6 +219,31 @@ export class DocumentUploadPageComponent implements OnInit {
           this.uploadProgress = 100;
           this.router.navigateByUrl(this.returnTo);
         }
+      }, () => {
+        if (!/^\d+$/.test(claimReference)) {
+          this.form.controls.claimReference.setErrors({ claimNotFound: true });
+        }
       });
+  }
+
+  private resolveClaimId(claimReference: string): Observable<number> {
+    if (!claimReference) {
+      this.form.controls.claimReference.setErrors({ required: true });
+      return EMPTY;
+    }
+
+    if (/^\d+$/.test(claimReference)) {
+      const claimId = Number(claimReference);
+      if (claimId > 0) {
+        return of(claimId);
+      }
+
+      this.form.controls.claimReference.setErrors({ invalidClaimReference: true });
+      return EMPTY;
+    }
+
+    return this.claimService.getClaimByNumber(claimReference).pipe(
+      map(claim => claim.id)
+    );
   }
 }

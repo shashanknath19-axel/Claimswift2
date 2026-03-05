@@ -48,7 +48,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    @PreAuthorize("hasAnyRole('POLICYHOLDER', 'ADJUSTER', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('POLICYHOLDER', 'ADJUSTER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<StandardResponse<UserDTO>> getCurrentUser(@RequestAttribute("userId") Long userId) {
         UserDTO user = authService.getCurrentUser(userId);
         return ResponseEntity.ok(StandardResponse.success(user));
@@ -58,6 +58,36 @@ public class AuthController {
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<StandardResponse<List<UserDTO>>> getAdjusters() {
         return ResponseEntity.ok(StandardResponse.success(authService.getAdjusters()));
+    }
+
+    @PostMapping("/admin/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<StandardResponse<UserDTO>> createInternalUser(
+            @Valid @RequestBody AdminCreateUserRequest request,
+            @RequestAttribute("username") String actorUsername) {
+        UserDTO user = authService.createInternalUser(request, actorUsername);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(StandardResponse.success("User created successfully", user));
+    }
+
+    @PutMapping("/admin/users/{id}/roles")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<StandardResponse<UserDTO>> updateUserRoles(
+            @PathVariable("id") Long userId,
+            @Valid @RequestBody UserRoleUpdateRequest request,
+            @RequestAttribute("username") String actorUsername) {
+        UserDTO user = authService.updateUserRoles(userId, request.getRoles(), actorUsername);
+        return ResponseEntity.ok(StandardResponse.success("User roles updated", user));
+    }
+
+    @PatchMapping("/admin/users/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<StandardResponse<UserDTO>> updateUserStatus(
+            @PathVariable("id") Long userId,
+            @Valid @RequestBody UserStatusUpdateRequest request,
+            @RequestAttribute("username") String actorUsername) {
+        UserDTO user = authService.updateUserStatus(userId, request.getStatus(), actorUsername);
+        return ResponseEntity.ok(StandardResponse.success("User status updated", user));
     }
 
     @GetMapping("/health")

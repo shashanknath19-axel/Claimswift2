@@ -91,17 +91,25 @@ import { ClaimService } from '../../core/services/claim.service';
               <td>{{ claim.claimAmount | currency:'INR':'symbol':'1.0-0' }}</td>
               <td>{{ claim.assignedAdjusterId || '-' }}</td>
               <td>
-                <div class="assign-box">
-                  <input matInput type="number" placeholder="Adjuster ID" [(ngModel)]="adjusterMap[claim.id]" />
-                  <button mat-button (click)="assign(claim.id)">Assign</button>
-                  <button mat-button color="warn" *ngIf="claim.assignedAdjusterId" (click)="unassign(claim.id)">Remove</button>
+                <div class="assign-box" *ngIf="canAssign(claim) || canUnassign(claim); else noAssignActions">
+                  <input
+                    matInput
+                    type="number"
+                    placeholder="Adjuster ID"
+                    [(ngModel)]="adjusterMap[claim.id]"
+                    *ngIf="canAssign(claim)"
+                  />
+                  <button mat-button (click)="assign(claim.id)" *ngIf="canAssign(claim)">Assign</button>
+                  <button mat-button color="warn" *ngIf="canUnassign(claim)" (click)="unassign(claim.id)">Remove</button>
                 </div>
+                <ng-template #noAssignActions>-</ng-template>
               </td>
               <td class="action-buttons">
-                <button mat-button (click)="updateStatus(claim.id, 'UNDER_REVIEW')">Review</button>
-                <button mat-button color="primary" (click)="updateStatus(claim.id, 'APPROVED')">Approve</button>
-                <button mat-button color="warn" (click)="updateStatus(claim.id, 'REJECTED')">Reject</button>
-                <button mat-button (click)="updateStatus(claim.id, 'ADJUSTED')">Adjust</button>
+                <button mat-button (click)="updateStatus(claim.id, 'UNDER_REVIEW')" *ngIf="canMoveTo(claim, 'UNDER_REVIEW')">Review</button>
+                <button mat-button color="primary" (click)="updateStatus(claim.id, 'APPROVED')" *ngIf="canMoveTo(claim, 'APPROVED')">Approve</button>
+                <button mat-button color="warn" (click)="updateStatus(claim.id, 'REJECTED')" *ngIf="canMoveTo(claim, 'REJECTED')">Reject</button>
+                <button mat-button (click)="updateStatus(claim.id, 'ADJUSTED')" *ngIf="canMoveTo(claim, 'ADJUSTED')">Adjust</button>
+                <span class="text-muted small" *ngIf="!hasWorkflowActions(claim)">No actions</span>
               </td>
             </tr>
           </tbody>
@@ -114,7 +122,7 @@ import { ClaimService } from '../../core/services/claim.service';
       </div>
     </mat-card>
 
-    <mat-card class="claim-card adjuster-card">
+    <mat-card class="claim-card adjuster-card" *ngIf="canViewAdjusterDirectory">
       <div class="card-header">
         <h2>Adjuster Availability</h2>
       </div>
@@ -206,7 +214,9 @@ export class AdminClaimsPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadAdjusters();
+    if (this.canViewAdjusterDirectory) {
+      this.loadAdjusters();
+    }
     this.loadClaims();
   }
 
@@ -233,6 +243,11 @@ export class AdminClaimsPageComponent implements OnInit {
   }
 
   updateStatus(claimId: number, status: ClaimStatus): void {
+    const claim = this.claims.find(item => item.id === claimId);
+    if (!claim || !this.canMoveTo(claim, status)) {
+      return;
+    }
+
     this.claimService.updateClaimStatus(claimId, { status }).subscribe(updated => {
       this.claims = this.claims.map(claim => claim.id === updated.id ? updated : claim);
       this.refreshAdjusterAvailability();
@@ -240,6 +255,11 @@ export class AdminClaimsPageComponent implements OnInit {
   }
 
   assign(claimId: number): void {
+    const claim = this.claims.find(item => item.id === claimId);
+    if (!claim || !this.canAssign(claim)) {
+      return;
+    }
+
     const adjusterId = Number(this.adjusterMap[claimId]);
     if (!adjusterId) {
       return;
@@ -252,6 +272,11 @@ export class AdminClaimsPageComponent implements OnInit {
   }
 
   unassign(claimId: number): void {
+    const claim = this.claims.find(item => item.id === claimId);
+    if (!claim || !this.canUnassign(claim)) {
+      return;
+    }
+
     this.claimService.unassignClaim(claimId).subscribe(updated => {
       this.claims = this.claims.map(claim => claim.id === updated.id ? updated : claim);
       this.refreshAdjusterAvailability();
@@ -260,6 +285,45 @@ export class AdminClaimsPageComponent implements OnInit {
 
   statusClass(status: string): string {
     return status.toLowerCase().replace(/_/g, '-');
+  }
+
+  canAssign(claim: Claim): boolean {
+    return claim.status === 'SUBMITTED';
+  }
+
+  canUnassign(claim: Claim): boolean {
+    return claim.status === 'UNDER_REVIEW' && !!claim.assignedAdjusterId;
+  }
+
+  canMoveTo(claim: Claim, nextStatus: ClaimStatus): boolean {
+    const transitions = this.getAllowedTransitions(claim.status);
+    return transitions.includes(nextStatus);
+  }
+
+  hasWorkflowActions(claim: Claim): boolean {
+    return this.canMoveTo(claim, 'UNDER_REVIEW')
+      || this.canMoveTo(claim, 'APPROVED')
+      || this.canMoveTo(claim, 'REJECTED')
+      || this.canMoveTo(claim, 'ADJUSTED');
+  }
+
+  get canViewAdjusterDirectory(): boolean {
+    return this.authService.hasAnyRole(['MANAGER', 'ADMIN']);
+  }
+
+  private getAllowedTransitions(currentStatus: ClaimStatus): ClaimStatus[] {
+    const transitions: Record<ClaimStatus, ClaimStatus[]> = {
+      SUBMITTED: ['UNDER_REVIEW', 'CANCELLED'],
+      UNDER_REVIEW: ['APPROVED', 'REJECTED', 'ADJUSTED', 'CANCELLED'],
+      ADJUSTED: ['APPROVED', 'REJECTED', 'CANCELLED'],
+      APPROVED: ['PAID', 'PAYMENT_FAILED'],
+      PAYMENT_FAILED: ['PAID', 'CANCELLED'],
+      REJECTED: [],
+      PAID: [],
+      CANCELLED: []
+    };
+
+    return transitions[currentStatus] ?? [];
   }
 
   private refreshAdjusterAvailability(): void {

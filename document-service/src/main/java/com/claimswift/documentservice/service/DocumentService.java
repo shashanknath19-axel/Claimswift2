@@ -4,6 +4,7 @@ import com.claimswift.documentservice.dto.DocumentResponse;
 import com.claimswift.documentservice.dto.DocumentUploadRequest;
 import com.claimswift.documentservice.entity.Document;
 import com.claimswift.documentservice.exception.InvalidFileException;
+import com.claimswift.documentservice.exception.UnsupportedDocumentTypeException;
 import com.claimswift.documentservice.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -182,18 +183,22 @@ public class DocumentService {
         String originalFileName = file.getOriginalFilename();
         String extension = getFileExtension(originalFileName).toLowerCase(Locale.ROOT);
         if (!"pdf".equals(extension)) {
-            throw new InvalidFileException("Only PDF documents are allowed");
+            throw new UnsupportedDocumentTypeException("Only PDF documents are allowed. Upload a .pdf file.");
         }
 
         String contentType = file.getContentType();
-        if (contentType == null) {
-            throw new InvalidFileException("File content type cannot be determined");
+        if (contentType == null || contentType.isBlank()) {
+            throw new UnsupportedDocumentTypeException("Unable to determine file type. Upload a valid PDF document.");
         }
 
-        List<String> allowedTypes = List.of("application/pdf", "application/x-pdf", "application/octet-stream");
+        List<String> allowedTypes = List.of("application/pdf", "application/x-pdf");
         String normalizedType = contentType.toLowerCase(Locale.ROOT);
         if (!allowedTypes.contains(normalizedType)) {
-            throw new InvalidFileException("File type not allowed: " + contentType);
+            throw new UnsupportedDocumentTypeException("Unsupported file type '" + contentType + "'. Only PDF is allowed.");
+        }
+
+        if (!hasPdfSignature(file)) {
+            throw new UnsupportedDocumentTypeException("Uploaded file content is not a valid PDF document.");
         }
     }
 
@@ -202,6 +207,20 @@ public class DocumentService {
             return "unknown";
         }
         return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+    }
+
+    private boolean hasPdfSignature(MultipartFile file) {
+        try {
+            byte[] header = file.getInputStream().readNBytes(5);
+            return header.length == 5
+                    && header[0] == '%'
+                    && header[1] == 'P'
+                    && header[2] == 'D'
+                    && header[3] == 'F'
+                    && header[4] == '-';
+        } catch (IOException ex) {
+            throw new InvalidFileException("Unable to read uploaded file for validation");
+        }
     }
 
     private DocumentResponse mapToResponse(Document document) {

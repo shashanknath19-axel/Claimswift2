@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -49,10 +50,38 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
 
     @Query("""
             SELECT c FROM Claim c
-            WHERE LOWER(c.claimNumber) LIKE LOWER(CONCAT('%', :query, '%'))
+            WHERE function('str', c.id) LIKE CONCAT('%', :query, '%')
+               OR LOWER(c.claimNumber) LIKE LOWER(CONCAT('%', :query, '%'))
                OR LOWER(c.policyNumber) LIKE LOWER(CONCAT('%', :query, '%'))
                OR LOWER(c.vehicleRegistration) LIKE LOWER(CONCAT('%', :query, '%'))
+               OR LOWER(COALESCE(c.claimantName, '')) LIKE LOWER(CONCAT('%', :query, '%'))
+               OR LOWER(COALESCE(c.claimantPhone, '')) LIKE LOWER(CONCAT('%', :query, '%'))
             ORDER BY c.createdAt DESC
             """)
     List<Claim> searchClaims(@Param("query") String query);
+
+    @Query("""
+            SELECT c FROM Claim c
+            WHERE c.claimantId = :claimantId
+              AND (:status IS NULL OR c.status = :status)
+              AND (:fromDate IS NULL OR c.incidentDate >= :fromDate)
+              AND (:toDate IS NULL OR c.incidentDate <= :toDate)
+              AND (
+                    :query IS NULL
+                 OR function('str', c.id) LIKE CONCAT('%', :query, '%')
+                 OR LOWER(c.claimNumber) LIKE LOWER(CONCAT('%', :query, '%'))
+                 OR LOWER(c.policyNumber) LIKE LOWER(CONCAT('%', :query, '%'))
+                 OR LOWER(COALESCE(c.claimantName, '')) LIKE LOWER(CONCAT('%', :query, '%'))
+                 OR LOWER(COALESCE(c.claimantPhone, '')) LIKE LOWER(CONCAT('%', :query, '%'))
+                 OR LOWER(COALESCE(c.vehicleRegistration, '')) LIKE LOWER(CONCAT('%', :query, '%'))
+              )
+            ORDER BY c.createdAt DESC
+            """)
+    List<Claim> searchMyClaims(
+            @Param("claimantId") Long claimantId,
+            @Param("query") String query,
+            @Param("status") Claim.ClaimStatus status,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
 }

@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import org.slf4j.MDC;
 
 /**
  * Standard API Response Wrapper for Gateway
@@ -18,27 +17,37 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
-    private boolean success;
+    private String code;
     private String message;
     private T data;
-    private LocalDateTime timestamp;
-    private String errorCode;
+    private String requestId;
 
     public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
-                .success(true)
+                .code("SUCCESS")
                 .message(message)
                 .data(data)
-                .timestamp(LocalDateTime.now())
+                .requestId(currentRequestId())
                 .build();
     }
 
-    public static <T> ApiResponse<T> error(String message, String errorCode) {
+    public static <T> ApiResponse<T> error(String message, String code) {
         return ApiResponse.<T>builder()
-                .success(false)
+                .code(code)
                 .message(message)
-                .errorCode(errorCode)
-                .timestamp(LocalDateTime.now())
+                .requestId(currentRequestId())
                 .build();
+    }
+
+    public static <T> ApiResponse<T> error(String message, String code, String requestId) {
+        return ApiResponse.<T>builder()
+                .code(code)
+                .message(message)
+                .requestId(requestId)
+                .build();
+    }
+
+    private static String currentRequestId() {
+        return MDC.get("correlationId");
     }
 }

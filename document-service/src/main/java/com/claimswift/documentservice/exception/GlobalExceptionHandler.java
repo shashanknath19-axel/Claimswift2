@@ -39,6 +39,13 @@ public class GlobalExceptionHandler {
                 .body(StandardResponse.error(ex.getMessage(), "INVALID_FILE"));
     }
 
+    @ExceptionHandler(UnsupportedDocumentTypeException.class)
+    public ResponseEntity<StandardResponse<Void>> handleUnsupportedDocumentType(UnsupportedDocumentTypeException ex) {
+        log.warn("Unsupported document type: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(StandardResponse.error(ex.getMessage(), "UNSUPPORTED_MEDIA_TYPE"));
+    }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<StandardResponse<Void>> handleMaxSizeException(MaxUploadSizeExceededException ex) {
         log.warn("File too large: {}", ex.getMessage());

@@ -4,40 +4,33 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import org.slf4j.MDC;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class StandardResponse<T> {
-    private boolean success;
+    private String code;
     private String message;
     private T data;
-    private LocalDateTime timestamp;
-    private int statusCode;
-    private String errorCode;
+    private String requestId;
 
     public static <T> StandardResponse<T> success(T data) {
         return StandardResponse.<T>builder()
-                .success(true)
+                .code("SUCCESS")
                 .message("Success")
                 .data(data)
-                .timestamp(LocalDateTime.now())
-                .statusCode(200)
-                .errorCode(null)
+                .requestId(currentRequestId())
                 .build();
     }
 
     public static <T> StandardResponse<T> success(String message, T data) {
         return StandardResponse.<T>builder()
-                .success(true)
+                .code("SUCCESS")
                 .message(message)
                 .data(data)
-                .timestamp(LocalDateTime.now())
-                .statusCode(200)
-                .errorCode(null)
+                .requestId(currentRequestId())
                 .build();
     }
 
@@ -46,36 +39,31 @@ public class StandardResponse<T> {
     }
 
     public static <T> StandardResponse<T> error(String message, int statusCode, T data) {
-        return StandardResponse.<T>builder()
-                .success(false)
-                .message(message)
-                .data(data)
-                .timestamp(LocalDateTime.now())
-                .statusCode(statusCode)
-                .errorCode(mapStatusToErrorCode(statusCode))
-                .build();
+        return error(message, mapStatusToCode(statusCode), data);
     }
 
     public static <T> StandardResponse<T> error(String message, String errorCode) {
         return error(message, errorCode, null, 400);
     }
 
-    public static <T> StandardResponse<T> error(String message, String errorCode, T data) {
-        return error(message, errorCode, data, 400);
-    }
+//    public static <T> StandardResponse<T> error(String message, String errorCode, T data) {
+//        return error(message, errorCode, data, 400);
+//    }
 
     public static <T> StandardResponse<T> error(String message, String errorCode, T data, int statusCode) {
+        return error(message, errorCode, data);
+    }
+
+    public static <T> StandardResponse<T> error(String message, String errorCode, T data) {
         return StandardResponse.<T>builder()
-                .success(false)
+                .code(errorCode == null || errorCode.isBlank() ? "ERROR" : errorCode)
                 .message(message)
                 .data(data)
-                .timestamp(LocalDateTime.now())
-                .statusCode(statusCode)
-                .errorCode(errorCode)
+                .requestId(currentRequestId())
                 .build();
     }
 
-    private static String mapStatusToErrorCode(int statusCode) {
+    private static String mapStatusToCode(int statusCode) {
         return switch (statusCode) {
             case 400 -> "BAD_REQUEST";
             case 401 -> "UNAUTHORIZED";
@@ -86,5 +74,9 @@ public class StandardResponse<T> {
             case 500 -> "INTERNAL_ERROR";
             default -> "ERROR";
         };
+    }
+
+    private static String currentRequestId() {
+        return MDC.get("correlationId");
     }
 }

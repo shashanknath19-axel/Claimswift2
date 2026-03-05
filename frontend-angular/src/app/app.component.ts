@@ -216,10 +216,12 @@ import { User } from './core/models/user.model';
       left: 0;
       right: 0;
       z-index: 1000;
-      height: 70px;
-      background: linear-gradient(110deg, #0f3553 0%, #1a4d73 50%, #1f5f88 100%);
-      box-shadow: 0 10px 30px rgba(12, 40, 63, 0.32);
-      padding: 0 0.85rem;
+      height: 72px;
+      background: linear-gradient(105deg, #0e334f 0%, #19547d 52%, #1d6695 100%);
+      box-shadow: 0 12px 34px rgba(12, 40, 63, 0.31);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0 0.9rem;
+      backdrop-filter: blur(4px);
     }
 
     .app-title {
@@ -253,11 +255,13 @@ import { User } from './core/models/user.model';
 
     .connection-status {
       margin-right: 16px;
-      padding: 6px 14px;
+      padding: 7px 14px;
       border-radius: 999px;
       font-size: 0.78rem;
       font-weight: 600;
       border: 1px solid transparent;
+      min-width: 90px;
+      text-align: center;
 
       &.connected {
         background-color: #e7f6ee;
@@ -283,9 +287,10 @@ import { User } from './core/models/user.model';
       align-items: center;
       gap: 8px;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.32);
-      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.14);
       color: #ffffff;
+      padding: 0 8px 0 10px;
     }
 
     .role-chip {
@@ -312,20 +317,22 @@ import { User } from './core/models/user.model';
     }
 
     .sidenav-container.with-header {
-      margin-top: 70px;
+      margin-top: 72px;
     }
 
     .app-sidenav {
-      width: 286px;
+      width: 294px;
       background: linear-gradient(180deg, #f8fbff 0%, #f4f9ff 100%);
       border-right: 1px solid #d2deeb;
+      box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.6);
     }
 
     .mat-mdc-nav-list .mat-mdc-list-item {
-      margin: 3px 10px;
-      border-radius: 10px;
+      margin: 4px 10px;
+      border-radius: 11px;
       border: 1px solid transparent;
       transition: all 0.2s ease-in-out;
+      min-height: 46px;
 
       &.active {
         background: linear-gradient(96deg, #d4eaff 0%, #ecf5ff 100%);
@@ -335,7 +342,8 @@ import { User } from './core/models/user.model';
       }
 
       &:hover {
-        background-color: #eaf3fa;
+        background-color: #e8f3fc;
+        border-color: #d2e4f3;
       }
     }
 

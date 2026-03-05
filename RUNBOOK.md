@@ -13,8 +13,7 @@ Run services in this order:
 
 1. `config-server` (`8888`)
 2. `eureka-server` (`8761`)
-3. `api-gateway` (`8080`)
-4. Domain services:
+3. Domain services:
    - `auth-service` (`8081`)
    - `claim-service` (`8082`)
    - `document-service` (`8083`)
@@ -22,6 +21,7 @@ Run services in this order:
    - `payment-service` (`8085`)
    - `notification-service` (`8086`)
    - `reporting-service` (`8087`)
+4. `api-gateway` (`8080`)
 
 ## 2. Start Commands
 
@@ -30,7 +30,6 @@ From repository root:
 ```bash
 mvn -pl config-server spring-boot:run
 mvn -pl eureka-server spring-boot:run
-mvn -pl api-gateway spring-boot:run
 mvn -pl auth-service spring-boot:run
 mvn -pl claim-service spring-boot:run
 mvn -pl document-service spring-boot:run
@@ -38,6 +37,7 @@ mvn -pl assessment-service spring-boot:run
 mvn -pl payment-service spring-boot:run
 mvn -pl notification-service spring-boot:run
 mvn -pl reporting-service spring-boot:run
+mvn -pl api-gateway spring-boot:run
 ```
 
 ## 3. Frontend Startup
@@ -50,7 +50,18 @@ npm start
 
 Open `http://localhost:4200`.
 
-## 4. Health Checks
+## 4. Gateway Route Conventions
+
+All frontend API calls must target `http://localhost:8080/api/*`.
+
+Gateway public allowlist:
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `POST /api/auth/refresh`
+
+Everything else under `/api/*` requires a valid JWT.
+
+## 5. Health Checks
 
 Common actuator health endpoints:
 
@@ -63,7 +74,7 @@ Eureka dashboard:
 
 - `http://localhost:8761`
 
-## 5. Configuration Notes
+## 6. Configuration Notes
 
 - Services import config via Config Server (`spring.config.import=optional:configserver:`).
 - Shared defaults are in:
@@ -71,7 +82,7 @@ Eureka dashboard:
 - Service-specific configs are in:
   - `config-server/src/main/resources/config/*.yml`
 
-## 6. Security Notes (Dev Defaults)
+## 7. Security Notes (Dev Defaults)
 
 The configuration contains local default credentials/secrets for development convenience:
 
@@ -82,7 +93,7 @@ The configuration contains local default credentials/secrets for development con
 
 Change these values for any shared or production environment.
 
-## 7. Troubleshooting
+## 8. Troubleshooting
 
 - Service fails to start with config errors:
   - Verify `config-server` is up first on `8888`.

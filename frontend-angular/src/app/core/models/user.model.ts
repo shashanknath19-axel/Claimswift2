@@ -6,7 +6,7 @@ export interface User {
   lastName: string;
   phoneNumber?: string;
   roles: string[];
-  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'PENDING_VERIFICATION';
   createdAt: string;
   updatedAt: string;
 }
@@ -23,7 +23,6 @@ export interface RegisterRequest {
   firstName: string;
   lastName: string;
   phoneNumber?: string;
-  role: 'ROLE_POLICYHOLDER' | 'ROLE_ADJUSTER' | 'ROLE_MANAGER';
 }
 
 export interface AuthResponse {

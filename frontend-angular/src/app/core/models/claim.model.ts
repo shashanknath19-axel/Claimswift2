@@ -14,6 +14,7 @@ export interface Claim {
   policyNumber: string;
   policyholderId?: number;
   policyholderName?: string;
+  policyholderPhone?: string;
   policyholderEmail?: string;
 
   // Vehicle details

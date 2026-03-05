@@ -2,14 +2,14 @@ package com.claimswift.authservice.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-/**
- * DTO for user registration requests
- */
+import java.util.Set;
+
 @Data
-public class RegisterRequest {
+public class AdminCreateUserRequest {
 
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
@@ -31,4 +31,9 @@ public class RegisterRequest {
 
     @Size(max = 20, message = "Phone number must be at most 20 characters")
     private String phoneNumber;
+
+    @NotEmpty(message = "At least one role is required")
+    private Set<String> roles;
+
+    private String status;
 }

@@ -73,6 +73,29 @@ export class ClaimService {
       .pipe(map(response => response.data));
   }
 
+  searchMyClaims(filters: {
+    query?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+  }): Observable<Claim[]> {
+    let params = new HttpParams();
+    if (filters.query) {
+      params = params.set('query', filters.query);
+    }
+    if (filters.status) {
+      params = params.set('status', filters.status);
+    }
+    if (filters.fromDate) {
+      params = params.set('fromDate', filters.fromDate);
+    }
+    if (filters.toDate) {
+      params = params.set('toDate', filters.toDate);
+    }
+    return this.http.get<ApiResponse<Claim[]>>(`${this.API_URL}/my-claims/search`, { params })
+      .pipe(map(response => response.data));
+  }
+
   getClaimHistory(): Observable<Claim[]> {
     return this.http.get<ApiResponse<Claim[]>>(`${this.API_URL}/history`)
       .pipe(map(response => response.data));
