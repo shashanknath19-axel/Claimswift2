@@ -1,0 +1,34 @@
+# Maven / Java build outputs
+**/target/
+**/bin/target/
+
+# Runtime logs
+*.log
+logs/
+run-logs/*.log
+run-logs/service-logs/
+
+# Generated run artifacts
+run-logs/api-smoke-report-*.json
+run-logs/api-smoke-report-*.csv
+run-logs/api-smoke-report-*.endpoints.csv
+run-logs/postman-env-*.json
+run-logs/ClaimSwift-Local-Smoke-*.postman_collection.json
+run-logs/security-*.json
+run-logs/workflow-*.json
+run-logs/smoke-upload-*
+run-logs/workflow-upload-*
+run-logs/infra-verification-*.md
+run-logs/postman-api-list-*.md
+
+# Uploaded test files
+uploads/
+
+# IDE / local caches
+.angular/
+.metadata/
+
+# Frontend dependencies and build outputs
+frontend-angular/node_modules/
+frontend-angular/.angular/
+frontend-angular/dist/
