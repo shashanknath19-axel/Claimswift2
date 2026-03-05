@@ -50,7 +50,7 @@ import { DocumentService } from '../../core/services/document.service';
       </div>
 
       <div class="table-wrap" *ngIf="!loading && claims.length">
-        <table class="data-table">
+        <table class="data-table table table-hover align-middle mb-0">
           <thead>
             <tr>
               <th>Claim #</th>

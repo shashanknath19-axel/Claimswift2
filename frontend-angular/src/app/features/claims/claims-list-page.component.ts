@@ -48,8 +48,8 @@ import { ClaimService } from '../../core/services/claim.service';
     </section>
 
     <mat-card class="claim-card fade-in">
-      <div class="toolbar">
-        <form [formGroup]="filterForm" class="filters">
+      <div class="toolbar row g-2 align-items-end">
+        <form [formGroup]="filterForm" class="filters col-12 col-lg">
           <mat-form-field appearance="outline">
             <mat-label>Status</mat-label>
             <mat-select formControlName="status">
@@ -65,10 +65,12 @@ import { ClaimService } from '../../core/services/claim.service';
           </mat-form-field>
         </form>
 
-        <button mat-stroked-button (click)="loadClaims()">
-          <mat-icon>refresh</mat-icon>
-          Refresh
-        </button>
+        <div class="col-12 col-lg-auto d-flex justify-content-lg-end">
+          <button mat-stroked-button (click)="loadClaims()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div class="loading-container" *ngIf="loading">
@@ -83,7 +85,7 @@ import { ClaimService } from '../../core/services/claim.service';
       </div>
 
       <div class="table-wrap" *ngIf="!loading && claims.length">
-        <table class="data-table">
+        <table class="data-table table table-hover align-middle mb-0">
           <thead>
             <tr>
               <th>Claim #</th>

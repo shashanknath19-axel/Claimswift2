@@ -40,23 +40,27 @@ import { ClaimService } from '../../core/services/claim.service';
     </section>
 
     <mat-card class="claim-card fade-in">
-      <div class="toolbar">
-        <mat-form-field appearance="outline">
-          <mat-label>Status Filter</mat-label>
-          <mat-select [(ngModel)]="statusFilter" (selectionChange)="loadClaims()">
-            <mat-option value="ALL">All</mat-option>
-            <mat-option value="SUBMITTED">Submitted</mat-option>
-            <mat-option value="UNDER_REVIEW">Under Review</mat-option>
-            <mat-option value="APPROVED">Approved</mat-option>
-            <mat-option value="REJECTED">Rejected</mat-option>
-            <mat-option value="PAID">Paid</mat-option>
-          </mat-select>
-        </mat-form-field>
+      <div class="toolbar row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Status Filter</mat-label>
+            <mat-select [(ngModel)]="statusFilter" (selectionChange)="loadClaims()">
+              <mat-option value="ALL">All</mat-option>
+              <mat-option value="SUBMITTED">Submitted</mat-option>
+              <mat-option value="UNDER_REVIEW">Under Review</mat-option>
+              <mat-option value="APPROVED">Approved</mat-option>
+              <mat-option value="REJECTED">Rejected</mat-option>
+              <mat-option value="PAID">Paid</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-        <button mat-stroked-button (click)="loadClaims()">
-          <mat-icon>refresh</mat-icon>
-          Refresh
-        </button>
+        <div class="col-12 col-md-auto d-flex justify-content-md-end">
+          <button mat-stroked-button (click)="loadClaims()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div class="loading-container" *ngIf="loading">
@@ -65,7 +69,7 @@ import { ClaimService } from '../../core/services/claim.service';
       </div>
 
       <div class="table-wrap" *ngIf="!loading && claims.length">
-        <table class="data-table">
+        <table class="data-table table table-hover align-middle mb-0">
           <thead>
             <tr>
               <th>Claim #</th>
@@ -120,7 +124,7 @@ import { ClaimService } from '../../core/services/claim.service';
           <h3>No adjuster assignment data yet</h3>
         </div>
 
-        <table class="data-table" *ngIf="adjusterAvailability.length">
+        <table class="data-table table table-hover align-middle mb-0" *ngIf="adjusterAvailability.length">
           <thead>
             <tr>
               <th>Adjuster ID</th>

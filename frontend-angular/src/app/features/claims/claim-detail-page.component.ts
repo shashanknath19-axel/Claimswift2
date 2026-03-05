@@ -66,47 +66,55 @@ import { PaymentService } from '../../core/services/payment.service';
     </div>
 
     <ng-container *ngIf="!loading && claim">
-      <section class="summary-grid">
-        <mat-card class="kpi-card">
-          <div class="kpi-title">Status</div>
-          <span class="status-badge" [ngClass]="'status-' + statusClass(claim.status)">{{ claim.status }}</span>
-        </mat-card>
-        <mat-card class="kpi-card">
-          <div class="kpi-title">Claim Amount</div>
-          <div class="kpi-value">{{ claim.claimAmount | currency:'INR':'symbol':'1.0-0' }}</div>
-        </mat-card>
-        <mat-card class="kpi-card">
-          <div class="kpi-title">Documents</div>
-          <div class="kpi-value">{{ documents.length }}</div>
-        </mat-card>
-        <mat-card class="kpi-card">
-          <div class="kpi-title">Payments</div>
-          <div class="kpi-value">{{ payments.length }}</div>
-        </mat-card>
+      <section class="row g-3 mb-3">
+        <div class="col-12 col-sm-6 col-xl-3">
+          <mat-card class="kpi-card h-100">
+            <div class="kpi-title">Status</div>
+            <span class="status-badge" [ngClass]="'status-' + statusClass(claim.status)">{{ claim.status }}</span>
+          </mat-card>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <mat-card class="kpi-card h-100">
+            <div class="kpi-title">Claim Amount</div>
+            <div class="kpi-value">{{ claim.claimAmount | currency:'INR':'symbol':'1.0-0' }}</div>
+          </mat-card>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <mat-card class="kpi-card h-100">
+            <div class="kpi-title">Documents</div>
+            <div class="kpi-value">{{ documents.length }}</div>
+          </mat-card>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <mat-card class="kpi-card h-100">
+            <div class="kpi-title">Payments</div>
+            <div class="kpi-value">{{ payments.length }}</div>
+          </mat-card>
+        </div>
       </section>
 
       <mat-card class="claim-card">
         <div class="card-header">
           <h2>Incident Information</h2>
         </div>
-        <div class="card-body detail-grid">
-          <div>
+        <div class="card-body detail-grid row g-3">
+          <div class="col-12 col-md-6">
             <div class="label">Incident Date</div>
             <div>{{ claim.incidentDate | date:'mediumDate' }}</div>
           </div>
-          <div>
+          <div class="col-12 col-md-6">
             <div class="label">Incident Location</div>
             <div>{{ claim.incidentLocation || '-' }}</div>
           </div>
-          <div>
+          <div class="col-12 col-md-6">
             <div class="label">Vehicle</div>
             <div>{{ claim.vehicleMake }} {{ claim.vehicleModel }} ({{ claim.vehicleYear }})</div>
           </div>
-          <div>
+          <div class="col-12 col-md-6">
             <div class="label">Vehicle Registration</div>
             <div>{{ claim.vehicleRegistrationNumber || claim.vehicleRegistration || '-' }}</div>
           </div>
-          <div class="full">
+          <div class="col-12">
             <div class="label">Description</div>
             <div>{{ claim.incidentDescription || '-' }}</div>
           </div>
@@ -117,7 +125,7 @@ import { PaymentService } from '../../core/services/payment.service';
         <div class="card-header">
           <h2>Adjuster Actions</h2>
         </div>
-        <div class="card-body action-row">
+        <div class="card-body action-row d-flex flex-wrap gap-2">
           <button mat-stroked-button (click)="updateStatus('UNDER_REVIEW')">Mark Under Review</button>
           <button mat-flat-button color="primary" (click)="approveClaim()">Approve</button>
           <button mat-flat-button color="warn" (click)="rejectClaim()">Disapprove</button>
@@ -152,13 +160,6 @@ import { PaymentService } from '../../core/services/payment.service';
       flex-wrap: wrap;
     }
 
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.8rem;
-      margin-bottom: 0.8rem;
-    }
-
     .kpi-card {
       border: 1px solid var(--border-color);
       border-radius: 0.8rem;
@@ -178,16 +179,6 @@ import { PaymentService } from '../../core/services/payment.service';
       color: #10324b;
     }
 
-    .detail-grid {
-      display: grid;
-      gap: 1rem;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .full {
-      grid-column: 1 / -1;
-    }
-
     .label {
       font-size: 0.8rem;
       text-transform: uppercase;
@@ -197,25 +188,7 @@ import { PaymentService } from '../../core/services/payment.service';
     }
 
     .action-row {
-      display: flex;
-      gap: 0.7rem;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 900px) {
-      .summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .detail-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 540px) {
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
+      align-items: center;
     }
   `]
 })

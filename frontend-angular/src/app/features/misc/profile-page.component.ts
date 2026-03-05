@@ -17,11 +17,11 @@ import { AuthService } from '../../core/services/auth.service';
 
     <mat-card class="claim-card fade-in">
       <div class="card-header"><h2>User Information</h2></div>
-      <div class="card-body detail-grid" *ngIf="authService.currentUser as user">
-        <div><span class="label">Username</span><div>{{ user.username }}</div></div>
-        <div><span class="label">Email</span><div>{{ user.email }}</div></div>
-        <div><span class="label">Name</span><div>{{ user.firstName }} {{ user.lastName }}</div></div>
-        <div><span class="label">Roles</span><div>{{ user.roles.join(', ') }}</div></div>
+      <div class="card-body detail-grid row g-3" *ngIf="authService.currentUser as user">
+        <div class="col-12 col-md-6"><span class="label">Username</span><div>{{ user.username }}</div></div>
+        <div class="col-12 col-md-6"><span class="label">Email</span><div>{{ user.email }}</div></div>
+        <div class="col-12 col-md-6"><span class="label">Name</span><div>{{ user.firstName }} {{ user.lastName }}</div></div>
+        <div class="col-12 col-md-6"><span class="label">Roles</span><div>{{ user.roles.join(', ') }}</div></div>
       </div>
     </mat-card>
   `,
@@ -36,12 +36,6 @@ import { AuthService } from '../../core/services/auth.service';
       color: var(--text-secondary);
     }
 
-    .detail-grid {
-      display: grid;
-      gap: 1rem;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .label {
       display: block;
       color: var(--text-secondary);
@@ -51,14 +45,8 @@ import { AuthService } from '../../core/services/auth.service';
       letter-spacing: 0.07em;
     }
 
-    @media (max-width: 768px) {
-      .detail-grid {
-        grid-template-columns: 1fr;
-      }
-    }
   `]
 })
 export class ProfilePageComponent {
   constructor(public readonly authService: AuthService) {}
 }
-

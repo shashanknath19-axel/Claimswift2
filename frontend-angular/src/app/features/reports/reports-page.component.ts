@@ -34,21 +34,27 @@ import { ReportingService } from '../../core/services/reporting.service';
     </section>
 
     <mat-card class="claim-card fade-in">
-      <form [formGroup]="form" class="toolbar" (ngSubmit)="loadReports()">
-        <mat-form-field appearance="outline">
-          <mat-label>Start Date</mat-label>
-          <input matInput type="date" formControlName="startDate" />
-        </mat-form-field>
+      <form [formGroup]="form" class="toolbar row g-2 align-items-end" (ngSubmit)="loadReports()">
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Start Date</mat-label>
+            <input matInput type="date" formControlName="startDate" />
+          </mat-form-field>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>End Date</mat-label>
-          <input matInput type="date" formControlName="endDate" />
-        </mat-form-field>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput type="date" formControlName="endDate" />
+          </mat-form-field>
+        </div>
 
-        <button mat-flat-button color="primary" type="submit">
-          <mat-icon>bar_chart</mat-icon>
-          Load Reports
-        </button>
+        <div class="col-12 col-md-auto d-flex justify-content-md-end">
+          <button mat-flat-button color="primary" type="submit">
+            <mat-icon>bar_chart</mat-icon>
+            Load Reports
+          </button>
+        </div>
       </form>
     </mat-card>
 
@@ -57,8 +63,9 @@ import { ReportingService } from '../../core/services/reporting.service';
       <p>Loading reports...</p>
     </div>
 
-    <section class="report-grid" *ngIf="!loading">
-      <mat-card class="claim-card">
+    <section class="row g-3 mt-1" *ngIf="!loading">
+      <div class="col-12 col-xl-6">
+      <mat-card class="claim-card h-100">
         <div class="card-header"><h2>Claim Summary</h2></div>
         <div class="card-body">
           <div class="metric-grid" *ngIf="claimSummaryMetrics.length; else claimSummaryRawTpl">
@@ -72,8 +79,10 @@ import { ReportingService } from '../../core/services/reporting.service';
           </ng-template>
         </div>
       </mat-card>
+      </div>
 
-      <mat-card class="claim-card">
+      <div class="col-12 col-xl-6">
+      <mat-card class="claim-card h-100">
         <div class="card-header"><h2>Payment Summary</h2></div>
         <div class="card-body">
           <div class="metric-grid" *ngIf="paymentSummaryMetrics.length; else paymentSummaryRawTpl">
@@ -87,12 +96,14 @@ import { ReportingService } from '../../core/services/reporting.service';
           </ng-template>
         </div>
       </mat-card>
+      </div>
 
-      <mat-card class="claim-card full">
+      <div class="col-12">
+      <mat-card class="claim-card">
         <div class="card-header"><h2>Adjuster Performance</h2></div>
         <div class="card-body">
           <div class="table-wrap" *ngIf="adjusterPerformanceRows.length">
-            <table class="data-table">
+            <table class="data-table table table-hover align-middle mb-0">
               <thead>
                 <tr>
                   <th *ngFor="let column of adjusterPerformanceColumns">{{ column }}</th>
@@ -108,6 +119,7 @@ import { ReportingService } from '../../core/services/reporting.service';
           <p class="placeholder" *ngIf="!adjusterPerformanceRows.length">No adjuster performance rows returned.</p>
         </div>
       </mat-card>
+      </div>
     </section>
   `,
   styles: [`
@@ -126,17 +138,6 @@ import { ReportingService } from '../../core/services/reporting.service';
       gap: 0.8rem;
       align-items: flex-end;
       flex-wrap: wrap;
-    }
-
-    .report-grid {
-      display: grid;
-      gap: 0.8rem;
-      grid-template-columns: 1fr 1fr;
-      margin-top: 0.8rem;
-    }
-
-    .full {
-      grid-column: 1 / -1;
     }
 
     pre {
@@ -184,10 +185,6 @@ import { ReportingService } from '../../core/services/reporting.service';
     }
 
     @media (max-width: 960px) {
-      .report-grid {
-        grid-template-columns: 1fr;
-      }
-
       .metric-grid {
         grid-template-columns: 1fr;
       }

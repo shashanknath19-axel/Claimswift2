@@ -36,12 +36,12 @@ import { User } from './core/models/user.model';
   template: `
     <div class="app-container" [class.authenticated]="isAuthenticated">
       <!-- Header -->
-      <mat-toolbar color="primary" class="app-header" *ngIf="isAuthenticated">
+      <mat-toolbar color="primary" class="app-header navbar" *ngIf="isAuthenticated">
         <button mat-icon-button (click)="toggleSidenav()" class="menu-button">
           <mat-icon>menu</mat-icon>
         </button>
         
-        <span class="app-title">
+        <span class="app-title navbar-brand mb-0">
           <mat-icon class="app-logo">directions_car</mat-icon>
           ClaimSwift
         </span>
@@ -56,7 +56,7 @@ import { User } from './core/models/user.model';
         </div>
         
         <!-- Notifications -->
-        <button mat-icon-button [matBadge]="unreadNotifications" matBadgeColor="warn" 
+        <button mat-icon-button class="icon-action" [matBadge]="unreadNotifications" matBadgeColor="warn" 
                 matBadgeSize="small" [matBadgeHidden]="unreadNotifications === 0"
                 routerLink="/notifications" matTooltip="Notifications">
           <mat-icon>notifications</mat-icon>
@@ -185,7 +185,7 @@ import { User } from './core/models/user.model';
 
         <!-- Main Content -->
         <mat-sidenav-content class="sidenav-content">
-          <main class="main-content">
+          <main class="main-content container-fluid container-xxl">
             <router-outlet></router-outlet>
           </main>
         </mat-sidenav-content>
@@ -193,7 +193,9 @@ import { User } from './core/models/user.model';
 
       <!-- Footer -->
       <footer class="app-footer" *ngIf="isAuthenticated">
-        <p>&copy; 2024 ClaimSwift. All rights reserved.</p>
+        <div class="container-fluid container-xxl">
+          <p>&copy; 2026 ClaimSwift. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   `,
@@ -202,7 +204,10 @@ import { User } from './core/models/user.model';
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: radial-gradient(circle at top right, #e8f4ff 0, #f7fafc 30%, #f4f7f8 100%);
+      background:
+        radial-gradient(circle at 8% 2%, #f5fbff 0, rgba(245, 251, 255, 0) 34%),
+        radial-gradient(circle at 92% 2%, #eef7ff 0, rgba(238, 247, 255, 0) 32%),
+        #eef3f8;
     }
 
     .app-header {
@@ -211,17 +216,21 @@ import { User } from './core/models/user.model';
       left: 0;
       right: 0;
       z-index: 1000;
-      background: linear-gradient(120deg, #184067 0%, #245484 45%, #2f668f 100%);
-      box-shadow: 0 8px 22px rgba(17, 47, 74, 0.28);
+      height: 70px;
+      background: linear-gradient(110deg, #0f3553 0%, #1a4d73 50%, #1f5f88 100%);
+      box-shadow: 0 10px 30px rgba(12, 40, 63, 0.32);
+      padding: 0 0.85rem;
     }
 
     .app-title {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 1.25rem;
-      font-weight: 500;
-      margin-left: 8px;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-left: 2px;
+      color: #ffffff;
     }
 
     .app-logo {
@@ -238,26 +247,34 @@ import { User } from './core/models/user.model';
       margin-right: 8px;
     }
 
+    .icon-action {
+      margin-right: 0.25rem;
+    }
+
     .connection-status {
       margin-right: 16px;
-      padding: 4px 12px;
-      border-radius: 16px;
-      font-size: 0.75rem;
-      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid transparent;
 
       &.connected {
-        background-color: #e8f5e9;
-        color: #2e7d32;
+        background-color: #e7f6ee;
+        color: #216e49;
+        border-color: #b8e2c8;
       }
 
       &.disconnected {
-        background-color: #ffebee;
-        color: #c62828;
+        background-color: #ffe9ec;
+        color: #b32637;
+        border-color: #ffc1ca;
       }
 
       &.connecting {
-        background-color: #e3f2fd;
-        color: #1976d2;
+        background-color: #e8f1ff;
+        color: #245fa7;
+        border-color: #bad4ff;
       }
     }
 
@@ -265,6 +282,10 @@ import { User } from './core/models/user.model';
       display: flex;
       align-items: center;
       gap: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
     }
 
     .role-chip {
@@ -291,25 +312,25 @@ import { User } from './core/models/user.model';
     }
 
     .sidenav-container.with-header {
-      margin-top: 64px;
+      margin-top: 70px;
     }
 
     .app-sidenav {
-      width: 276px;
-      background: linear-gradient(180deg, #f5f9fc 0%, #f9fcff 100%);
-      border-right: 1px solid #d7e3ec;
+      width: 286px;
+      background: linear-gradient(180deg, #f8fbff 0%, #f4f9ff 100%);
+      border-right: 1px solid #d2deeb;
     }
 
     .mat-mdc-nav-list .mat-mdc-list-item {
-      margin: 4px 10px;
-      border-radius: 12px;
+      margin: 3px 10px;
+      border-radius: 10px;
       border: 1px solid transparent;
       transition: all 0.2s ease-in-out;
 
       &.active {
-        background: linear-gradient(96deg, #d6ebfb 0%, #eef7ff 100%);
-        color: #0f557f;
-        border-color: #bfdcf1;
+        background: linear-gradient(96deg, #d4eaff 0%, #ecf5ff 100%);
+        color: #0f547d;
+        border-color: #b8d8f4;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
       }
 
@@ -346,25 +367,25 @@ import { User } from './core/models/user.model';
 
     .sidenav-content {
       background: transparent;
-      min-height: calc(100vh - 128px);
+      min-height: calc(100vh - 126px);
     }
 
     .main-content {
-      padding: 24px;
-      max-width: 1400px;
+      padding: 1.5rem;
+      max-width: 1480px;
       margin: 0 auto;
     }
 
     .app-footer {
-      background: #f9fbfd;
-      padding: 16px;
-      text-align: center;
-      border-top: 1px solid #e0e0e0;
+      background: #f6f9fc;
+      padding: 0.8rem 0;
+      border-top: 1px solid #d9e3ee;
 
       p {
         margin: 0;
-        color: #757575;
-        font-size: 0.875rem;
+        color: #5f7588;
+        font-size: 0.82rem;
+        text-align: center;
       }
     }
 
@@ -378,7 +399,7 @@ import { User } from './core/models/user.model';
       }
 
       .main-content {
-        padding: 16px;
+        padding: 1rem 0.9rem;
       }
 
       .username {

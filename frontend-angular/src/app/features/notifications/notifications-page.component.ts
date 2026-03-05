@@ -34,7 +34,7 @@ import { NotificationService } from '../../core/services/notification.service';
     </section>
 
     <mat-card class="claim-card fade-in">
-      <div class="meta">
+      <div class="meta d-flex justify-content-between align-items-center flex-wrap gap-2">
         <span>Unread: {{ unreadCount }}</span>
       </div>
 

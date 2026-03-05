@@ -58,23 +58,31 @@ interface TimelineEntry {
     </div>
 
     <ng-container *ngIf="!loading && claim">
-      <section class="summary-grid">
-        <mat-card class="kpi-card">
-          <div class="kpi-title">Current Status</div>
-          <span class="status-badge" [ngClass]="'status-' + statusClass(claim.status)">{{ claim.status }}</span>
-        </mat-card>
-        <mat-card class="kpi-card">
-          <div class="kpi-title">Documents</div>
-          <div class="kpi-value">{{ documents.length }}</div>
-        </mat-card>
-        <mat-card class="kpi-card">
-          <div class="kpi-title">Assessment</div>
-          <div class="kpi-value">{{ assessment ? 'Done' : 'Pending' }}</div>
-        </mat-card>
-        <mat-card class="kpi-card">
-          <div class="kpi-title">Payments</div>
-          <div class="kpi-value">{{ payments.length }}</div>
-        </mat-card>
+      <section class="row g-3 mb-3">
+        <div class="col-12 col-sm-6 col-xl-3">
+          <mat-card class="kpi-card h-100">
+            <div class="kpi-title">Current Status</div>
+            <span class="status-badge" [ngClass]="'status-' + statusClass(claim.status)">{{ claim.status }}</span>
+          </mat-card>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <mat-card class="kpi-card h-100">
+            <div class="kpi-title">Documents</div>
+            <div class="kpi-value">{{ documents.length }}</div>
+          </mat-card>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <mat-card class="kpi-card h-100">
+            <div class="kpi-title">Assessment</div>
+            <div class="kpi-value">{{ assessment ? 'Done' : 'Pending' }}</div>
+          </mat-card>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <mat-card class="kpi-card h-100">
+            <div class="kpi-title">Payments</div>
+            <div class="kpi-value">{{ payments.length }}</div>
+          </mat-card>
+        </div>
       </section>
 
       <mat-card class="claim-card">
@@ -91,8 +99,9 @@ interface TimelineEntry {
         </div>
       </mat-card>
 
-      <section class="detail-grid">
-        <mat-card class="claim-card">
+      <section class="row g-3 mt-1">
+        <div class="col-12 col-xl-6">
+        <mat-card class="claim-card h-100">
           <div class="card-header"><h2>Documents</h2></div>
           <div class="card-body">
             <div *ngIf="documents.length; else noDocTpl">
@@ -103,8 +112,10 @@ interface TimelineEntry {
             </div>
           </div>
         </mat-card>
+        </div>
 
-        <mat-card class="claim-card">
+        <div class="col-12 col-xl-6">
+        <mat-card class="claim-card h-100">
           <div class="card-header"><h2>Payments</h2></div>
           <div class="card-body">
             <div *ngIf="payments.length; else noPaymentTpl">
@@ -115,6 +126,7 @@ interface TimelineEntry {
             </div>
           </div>
         </mat-card>
+        </div>
       </section>
     </ng-container>
 
@@ -152,13 +164,6 @@ interface TimelineEntry {
       color: var(--text-secondary);
     }
 
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.8rem;
-      margin-bottom: 0.8rem;
-    }
-
     .kpi-card {
       border: 1px solid var(--border-color);
       border-radius: 0.8rem;
@@ -176,13 +181,6 @@ interface TimelineEntry {
       font-size: 1.2rem;
       font-weight: 700;
       color: #10324b;
-    }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.8rem;
-      margin-top: 0.8rem;
     }
 
     .row-line {
@@ -206,19 +204,15 @@ interface TimelineEntry {
       padding: 1rem 0;
     }
 
-    @media (max-width: 1100px) {
-      .summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .detail-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
     @media (max-width: 540px) {
-      .summary-grid {
-        grid-template-columns: 1fr;
+      .row-line {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .type {
+        max-width: 100%;
+        text-align: left;
       }
     }
   `]

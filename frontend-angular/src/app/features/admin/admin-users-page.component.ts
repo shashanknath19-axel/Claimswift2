@@ -21,11 +21,12 @@ import { MatIconModule } from '@angular/material/icon';
       </button>
     </section>
 
-    <section class="grid">
-      <mat-card class="claim-card">
+    <section class="row g-3">
+      <div class="col-12 col-xl-7">
+      <mat-card class="claim-card h-100">
         <div class="card-header"><h2>Role Matrix</h2></div>
         <div class="card-body">
-          <table class="data-table">
+          <table class="data-table table table-hover align-middle mb-0">
             <thead>
               <tr>
                 <th>Role</th>
@@ -53,8 +54,10 @@ import { MatIconModule } from '@angular/material/icon';
           </table>
         </div>
       </mat-card>
+      </div>
 
-      <mat-card class="claim-card">
+      <div class="col-12 col-xl-5">
+      <mat-card class="claim-card h-100">
         <div class="card-header"><h2>Current Implementation Notes</h2></div>
         <div class="card-body">
           <p>
@@ -67,6 +70,7 @@ import { MatIconModule } from '@angular/material/icon';
           </div>
         </div>
       </mat-card>
+      </div>
     </section>
   `,
   styles: [`
@@ -89,18 +93,6 @@ import { MatIconModule } from '@angular/material/icon';
       color: var(--text-secondary);
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 0.8rem;
-    }
-
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
   `]
 })
 export class AdminUsersPageComponent {}
-

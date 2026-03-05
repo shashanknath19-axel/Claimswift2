@@ -40,18 +40,22 @@ import { DocumentService } from '../../core/services/document.service';
 
     <mat-card class="claim-card fade-in">
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Claim ID</mat-label>
-            <input matInput type="number" formControlName="claimId" />
-          </mat-form-field>
+        <div class="row g-3 mb-1">
+          <div class="col-12 col-md-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Claim ID</mat-label>
+              <input matInput type="number" formControlName="claimId" />
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Document Type</mat-label>
-            <mat-select formControlName="documentType">
-              <mat-option *ngFor="let type of documentTypes" [value]="type">{{ type }}</mat-option>
-            </mat-select>
-          </mat-form-field>
+          <div class="col-12 col-md-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Document Type</mat-label>
+              <mat-select formControlName="documentType">
+                <mat-option *ngFor="let type of documentTypes" [value]="type">{{ type }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
         </div>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -59,7 +63,7 @@ import { DocumentService } from '../../core/services/document.service';
           <textarea matInput rows="3" formControlName="description"></textarea>
         </mat-form-field>
 
-        <div class="file-box">
+        <div class="file-box mb-2">
           <input type="file" accept=".pdf,application/pdf" (change)="onFileChanged($event)" />
           <p *ngIf="selectedFile">{{ selectedFile.name }}</p>
           <p *ngIf="!selectedFile">No file selected</p>
@@ -68,7 +72,7 @@ import { DocumentService } from '../../core/services/document.service';
 
         <mat-progress-bar mode="determinate" [value]="uploadProgress" *ngIf="uploadProgress > 0"></mat-progress-bar>
 
-        <div class="card-actions">
+        <div class="card-actions d-flex justify-content-end gap-2 flex-wrap">
           <button mat-stroked-button type="button" routerLink="/documents">Back</button>
           <button mat-flat-button color="primary" [disabled]="form.invalid || !selectedFile || isSubmitting">
             <mat-icon>cloud_upload</mat-icon>

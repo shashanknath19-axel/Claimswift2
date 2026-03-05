@@ -40,8 +40,9 @@ import {
       <p>Loading assessment...</p>
     </div>
 
-    <section class="grid" *ngIf="!loading">
-      <mat-card class="claim-card">
+    <section class="row g-3" *ngIf="!loading">
+      <div class="col-12 col-xl-6">
+      <mat-card class="claim-card h-100">
         <div class="card-header"><h2>Create Assessment</h2></div>
         <form [formGroup]="assessmentForm" (ngSubmit)="submitAssessment()" class="card-body">
           <div class="form-row">
@@ -68,8 +69,10 @@ import {
           </div>
         </form>
       </mat-card>
+      </div>
 
-      <mat-card class="claim-card">
+      <div class="col-12 col-xl-6">
+      <mat-card class="claim-card h-100">
         <div class="card-header"><h2>Decision</h2></div>
         <form [formGroup]="decisionForm" (ngSubmit)="submitDecision()" class="card-body">
           <div class="form-row">
@@ -100,6 +103,7 @@ import {
           </div>
         </form>
       </mat-card>
+      </div>
     </section>
   `,
   styles: [`
@@ -113,17 +117,6 @@ import {
       color: var(--text-secondary);
     }
 
-    .grid {
-      display: grid;
-      gap: 0.8rem;
-      grid-template-columns: 1fr 1fr;
-    }
-
-    @media (max-width: 960px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
   `]
 })
 export class AssessmentPageComponent implements OnInit {

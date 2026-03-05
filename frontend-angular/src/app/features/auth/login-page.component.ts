@@ -35,26 +35,32 @@ import { AuthService } from '../../core/services/auth.service';
           <p>Use your ClaimSwift account to continue.</p>
         </header>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
-          <mat-form-field appearance="outline">
-            <mat-label>Username or Email</mat-label>
-            <input matInput formControlName="usernameOrEmail" />
-            <mat-icon matSuffix>person</mat-icon>
-          </mat-form-field>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form row g-2">
+          <div class="col-12">
+            <mat-form-field appearance="outline">
+              <mat-label>Username or Email</mat-label>
+              <input matInput formControlName="usernameOrEmail" />
+              <mat-icon matSuffix>person</mat-icon>
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Password</mat-label>
-            <input matInput type="password" formControlName="password" />
-            <mat-icon matSuffix>lock</mat-icon>
-          </mat-form-field>
+          <div class="col-12">
+            <mat-form-field appearance="outline">
+              <mat-label>Password</mat-label>
+              <input matInput type="password" formControlName="password" />
+              <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+          </div>
 
-          <button mat-flat-button color="primary" [disabled]="loginForm.invalid || isSubmitting">
-            <span *ngIf="!isSubmitting">Login</span>
-            <span class="btn-loading" *ngIf="isSubmitting">
-              <mat-spinner diameter="18"></mat-spinner>
-              Signing in
-            </span>
-          </button>
+          <div class="col-12">
+            <button mat-flat-button color="primary" class="w-100" [disabled]="loginForm.invalid || isSubmitting">
+              <span *ngIf="!isSubmitting">Login</span>
+              <span class="btn-loading" *ngIf="isSubmitting">
+                <mat-spinner diameter="18"></mat-spinner>
+                Signing in
+              </span>
+            </button>
+          </div>
         </form>
 
         <footer class="auth-footer">

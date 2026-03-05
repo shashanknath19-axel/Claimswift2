@@ -49,27 +49,36 @@ import { NotificationService } from '../../core/services/notification.service';
       </div>
     </section>
 
-    <section class="kpi-grid" *ngIf="!loading; else loadingTpl">
-      <mat-card class="kpi-card">
-        <div class="kpi-title">Total Claims</div>
-        <div class="kpi-value">{{ summary.totalClaims }}</div>
-      </mat-card>
-      <mat-card class="kpi-card">
-        <div class="kpi-title">Under Review</div>
-        <div class="kpi-value">{{ summary.underReviewClaims }}</div>
-      </mat-card>
-      <mat-card class="kpi-card">
-        <div class="kpi-title">Approved</div>
-        <div class="kpi-value">{{ summary.approvedClaims }}</div>
-      </mat-card>
-      <mat-card class="kpi-card">
-        <div class="kpi-title">Rejected</div>
-        <div class="kpi-value">{{ summary.rejectedClaims }}</div>
-      </mat-card>
+    <section class="row g-3 mb-3" *ngIf="!loading; else loadingTpl">
+      <div class="col-12 col-sm-6 col-xl-3">
+        <mat-card class="kpi-card h-100">
+          <div class="kpi-title">Total Claims</div>
+          <div class="kpi-value">{{ summary.totalClaims }}</div>
+        </mat-card>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <mat-card class="kpi-card h-100">
+          <div class="kpi-title">Under Review</div>
+          <div class="kpi-value">{{ summary.underReviewClaims }}</div>
+        </mat-card>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <mat-card class="kpi-card h-100">
+          <div class="kpi-title">Approved</div>
+          <div class="kpi-value">{{ summary.approvedClaims }}</div>
+        </mat-card>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <mat-card class="kpi-card h-100">
+          <div class="kpi-title">Rejected</div>
+          <div class="kpi-value">{{ summary.rejectedClaims }}</div>
+        </mat-card>
+      </div>
     </section>
 
-    <section class="content-grid" *ngIf="!loading">
-      <mat-card class="panel">
+    <section class="row g-3" *ngIf="!loading">
+      <div class="col-12 col-xl-8">
+      <mat-card class="panel h-100">
         <header>
           <h2>Recent Claims</h2>
           <a routerLink="/claims">View all</a>
@@ -101,8 +110,10 @@ import { NotificationService } from '../../core/services/notification.service';
           </table>
         </div>
       </mat-card>
+      </div>
 
-      <mat-card class="panel">
+      <div class="col-12 col-xl-4">
+      <mat-card class="panel h-100">
         <header>
           <h2>Recent Notifications</h2>
           <a routerLink="/notifications">Open inbox</a>
@@ -115,6 +126,7 @@ import { NotificationService } from '../../core/services/notification.service';
           </li>
         </ul>
       </mat-card>
+      </div>
     </section>
 
     <ng-template #loadingTpl>
@@ -170,13 +182,6 @@ import { NotificationService } from '../../core/services/notification.service';
       flex-wrap: wrap;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
     .kpi-card {
       border: 1px solid #d9e5ed;
       border-radius: 0.95rem;
@@ -196,12 +201,6 @@ import { NotificationService } from '../../core/services/notification.service';
       font-size: 2rem;
       color: #10324b;
       font-weight: 700;
-    }
-
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1.4fr 1fr;
-      gap: 1rem;
     }
 
     .panel {
@@ -277,19 +276,10 @@ import { NotificationService } from '../../core/services/notification.service';
       font-size: 0.78rem;
     }
 
-    @media (max-width: 1200px) {
-      .kpi-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .content-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
     @media (max-width: 640px) {
-      .kpi-grid {
-        grid-template-columns: 1fr;
+      .panel header {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   `]

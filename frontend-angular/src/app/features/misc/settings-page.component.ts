@@ -17,7 +17,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
     <mat-card class="claim-card fade-in">
       <div class="card-header"><h2>Notification Preferences</h2></div>
-      <div class="card-body settings-grid">
+      <div class="card-body settings-grid d-grid gap-3">
         <mat-slide-toggle [(ngModel)]="settings.claimUpdates">Claim updates</mat-slide-toggle>
         <mat-slide-toggle [(ngModel)]="settings.documentUpdates">Document updates</mat-slide-toggle>
         <mat-slide-toggle [(ngModel)]="settings.paymentUpdates">Payment updates</mat-slide-toggle>
@@ -55,4 +55,3 @@ export class SettingsPageComponent {
     localStorage.setItem('claimswift_ui_settings', JSON.stringify(this.settings));
   }
 }
-

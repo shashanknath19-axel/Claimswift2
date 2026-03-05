@@ -91,7 +91,7 @@ import { ClaimService } from '../../core/services/claim.service';
           </mat-form-field>
         </div>
 
-        <div class="card-actions">
+        <div class="card-actions d-flex justify-content-end gap-2 flex-wrap">
           <button mat-stroked-button type="button" (click)="router.navigate(['/claims'])">Cancel</button>
           <button mat-flat-button color="primary" [disabled]="form.invalid || loading">
             <span *ngIf="!loading">{{ isEditMode ? 'Update Claim' : 'Submit Claim' }}</span>

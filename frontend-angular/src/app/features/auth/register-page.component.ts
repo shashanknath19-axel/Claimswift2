@@ -38,48 +38,62 @@ import { RegisterRequest } from '../../core/models/user.model';
           <p>Register to submit and manage insurance claims.</p>
         </header>
 
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Username</mat-label>
-            <input matInput formControlName="username" />
-          </mat-form-field>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form row g-2">
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Username</mat-label>
+              <input matInput formControlName="username" />
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input matInput type="email" formControlName="email" />
-          </mat-form-field>
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" />
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>First Name</mat-label>
-            <input matInput formControlName="firstName" />
-          </mat-form-field>
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>First Name</mat-label>
+              <input matInput formControlName="firstName" />
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Last Name</mat-label>
-            <input matInput formControlName="lastName" />
-          </mat-form-field>
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Last Name</mat-label>
+              <input matInput formControlName="lastName" />
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Password</mat-label>
-            <input matInput type="password" formControlName="password" />
-          </mat-form-field>
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Password</mat-label>
+              <input matInput type="password" formControlName="password" />
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Role</mat-label>
-            <mat-select formControlName="role">
-              <mat-option value="ROLE_POLICYHOLDER">Policyholder</mat-option>
-              <mat-option value="ROLE_ADJUSTER">Adjuster</mat-option>
-              <mat-option value="ROLE_MANAGER">Manager</mat-option>
-            </mat-select>
-          </mat-form-field>
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Role</mat-label>
+              <mat-select formControlName="role">
+                <mat-option value="ROLE_POLICYHOLDER">Policyholder</mat-option>
+                <mat-option value="ROLE_ADJUSTER">Adjuster</mat-option>
+                <mat-option value="ROLE_MANAGER">Manager</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-          <button mat-flat-button color="primary" class="full-span" [disabled]="form.invalid || isSubmitting">
-            <span *ngIf="!isSubmitting">Create Account</span>
-            <span class="btn-loading" *ngIf="isSubmitting">
-              <mat-spinner diameter="18"></mat-spinner>
-              Creating
-            </span>
-          </button>
+          <div class="col-12">
+            <button mat-flat-button color="primary" class="full-span" [disabled]="form.invalid || isSubmitting">
+              <span *ngIf="!isSubmitting">Create Account</span>
+              <span class="btn-loading" *ngIf="isSubmitting">
+                <mat-spinner diameter="18"></mat-spinner>
+                Creating
+              </span>
+            </button>
+          </div>
         </form>
 
         <footer class="auth-footer">
@@ -137,14 +151,10 @@ import { RegisterRequest } from '../../core/models/user.model';
       gap: 0.8rem;
     }
 
-    .grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .full-span {
-      grid-column: 1 / -1;
       min-height: 2.8rem;
       border-radius: 0.7rem;
+      width: 100%;
     }
 
     .btn-loading {
@@ -167,11 +177,6 @@ import { RegisterRequest } from '../../core/models/user.model';
       font-weight: 600;
     }
 
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
   `]
 })
 export class RegisterPageComponent implements OnInit {

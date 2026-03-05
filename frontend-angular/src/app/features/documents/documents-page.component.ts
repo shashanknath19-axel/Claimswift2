@@ -42,24 +42,30 @@ import { DocumentService } from '../../core/services/document.service';
     </section>
 
     <mat-card class="claim-card fade-in">
-      <form [formGroup]="filterForm" class="toolbar" (ngSubmit)="loadDocuments()">
-        <mat-form-field appearance="outline">
-          <mat-label>Claim ID (optional)</mat-label>
-          <input matInput type="number" formControlName="claimId" />
-        </mat-form-field>
+      <form [formGroup]="filterForm" class="toolbar row g-2 align-items-end" (ngSubmit)="loadDocuments()">
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Claim ID (optional)</mat-label>
+            <input matInput type="number" formControlName="claimId" />
+          </mat-form-field>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Document Type</mat-label>
-          <mat-select formControlName="documentType">
-            <mat-option value="">All</mat-option>
-            <mat-option *ngFor="let type of documentTypes" [value]="type">{{ type }}</mat-option>
-          </mat-select>
-        </mat-form-field>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Document Type</mat-label>
+            <mat-select formControlName="documentType">
+              <mat-option value="">All</mat-option>
+              <mat-option *ngFor="let type of documentTypes" [value]="type">{{ type }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-        <button mat-stroked-button type="submit">
-          <mat-icon>search</mat-icon>
-          Apply
-        </button>
+        <div class="col-12 col-md-auto d-flex justify-content-md-end">
+          <button mat-stroked-button type="submit">
+            <mat-icon>search</mat-icon>
+            Apply
+          </button>
+        </div>
       </form>
 
       <div class="loading-container" *ngIf="loading">
@@ -84,7 +90,7 @@ import { DocumentService } from '../../core/services/document.service';
       </div>
 
       <div class="table-wrap" *ngIf="!loading && documents.length">
-        <table class="data-table">
+        <table class="data-table table table-hover align-middle mb-0">
           <thead>
             <tr>
               <th>File</th>

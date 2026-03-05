@@ -28,7 +28,7 @@ import { PaymentService } from '../../core/services/payment.service';
       </div>
 
       <div class="table-wrap" *ngIf="!loading && payments.length">
-        <table class="data-table">
+        <table class="data-table table table-hover align-middle mb-0">
           <thead>
             <tr>
               <th>Payment ID</th>

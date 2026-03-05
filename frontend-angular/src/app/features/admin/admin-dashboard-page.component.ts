@@ -39,23 +39,31 @@ import { ClaimService } from '../../core/services/claim.service';
       </div>
     </section>
 
-    <section class="kpi-grid" *ngIf="!loading; else loadingTpl">
-      <mat-card class="kpi-card">
-        <div class="kpi-title">Total Claims</div>
-        <div class="kpi-value">{{ stats.totalClaims }}</div>
-      </mat-card>
-      <mat-card class="kpi-card">
-        <div class="kpi-title">Under Review</div>
-        <div class="kpi-value">{{ stats.underReviewClaims }}</div>
-      </mat-card>
-      <mat-card class="kpi-card">
-        <div class="kpi-title">Approved</div>
-        <div class="kpi-value">{{ stats.approvedClaims }}</div>
-      </mat-card>
-      <mat-card class="kpi-card">
-        <div class="kpi-title">Rejected</div>
-        <div class="kpi-value">{{ stats.rejectedClaims }}</div>
-      </mat-card>
+    <section class="row g-3 mb-3" *ngIf="!loading; else loadingTpl">
+      <div class="col-12 col-sm-6 col-xl-3">
+        <mat-card class="kpi-card h-100">
+          <div class="kpi-title">Total Claims</div>
+          <div class="kpi-value">{{ stats.totalClaims }}</div>
+        </mat-card>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <mat-card class="kpi-card h-100">
+          <div class="kpi-title">Under Review</div>
+          <div class="kpi-value">{{ stats.underReviewClaims }}</div>
+        </mat-card>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <mat-card class="kpi-card h-100">
+          <div class="kpi-title">Approved</div>
+          <div class="kpi-value">{{ stats.approvedClaims }}</div>
+        </mat-card>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <mat-card class="kpi-card h-100">
+          <div class="kpi-title">Rejected</div>
+          <div class="kpi-value">{{ stats.rejectedClaims }}</div>
+        </mat-card>
+      </div>
     </section>
 
     <mat-card class="claim-card" *ngIf="!loading">
@@ -68,7 +76,7 @@ import { ClaimService } from '../../core/services/claim.service';
           <h3>No priority claims</h3>
         </div>
 
-        <table class="data-table" *ngIf="priorityClaims.length">
+        <table class="data-table table table-hover align-middle mb-0" *ngIf="priorityClaims.length">
           <thead>
             <tr>
               <th>Claim #</th>
@@ -125,13 +133,6 @@ import { ClaimService } from '../../core/services/claim.service';
       flex-wrap: wrap;
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.8rem;
-      margin-bottom: 0.8rem;
-    }
-
     .kpi-card {
       border: 1px solid var(--border-color);
       border-radius: 0.8rem;
@@ -151,15 +152,9 @@ import { ClaimService } from '../../core/services/claim.service';
       color: #10324b;
     }
 
-    @media (max-width: 1100px) {
-      .kpi-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
     @media (max-width: 540px) {
-      .kpi-grid {
-        grid-template-columns: 1fr;
+      .header-actions {
+        width: 100%;
       }
     }
   `]
@@ -194,4 +189,3 @@ export class AdminDashboardPageComponent implements OnInit {
     return status.toLowerCase().replace(/_/g, '-');
   }
 }
-
