@@ -1,0 +1,116 @@
+.app-shell {
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem clamp(1rem, 2vw, 2rem);
+  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--surface-200) 78%, transparent);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.6rem;
+  color: var(--ink-100);
+  background: linear-gradient(145deg, var(--teal-600), var(--orange-500));
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.brand-text {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1;
+  color: var(--ink-900);
+}
+
+.brand-text small {
+  margin-top: 0.2rem;
+  color: var(--ink-500);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.topbar-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topbar-nav a,
+.ghost-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-800);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  transition: all 180ms ease;
+  cursor: pointer;
+}
+
+.topbar-nav a:hover,
+.ghost-btn:hover,
+.topbar-nav a.active {
+  border-color: var(--border-color);
+  background: color-mix(in srgb, var(--surface-100) 80%, transparent);
+}
+
+.cta-link {
+  background: var(--orange-500) !important;
+  color: var(--ink-100) !important;
+  border-color: transparent !important;
+}
+
+.cta-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(227, 97, 59, 0.35);
+}
+
+.page-content {
+  padding: clamp(1rem, 2vw, 2.2rem);
+}
+
+.user-pill {
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--surface-100) 84%, transparent);
+  padding: 0.36rem 0.72rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-800);
+}
+
+@media (max-width: 800px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
+  }
+
+  .topbar-nav {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}

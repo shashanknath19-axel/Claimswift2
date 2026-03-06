@@ -1,0 +1,98 @@
+<section class="claims-page">
+  <app-shell-card variant="accent" class="fade-up">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">Claims Intake</p>
+        <h1>Submit and monitor motor insurance claims</h1>
+        <p>Capture incident details, estimate loss value, and track claim status through assessment and settlement.</p>
+      </div>
+      <div class="role-pills" *ngIf="currentUser$ | async as user">
+        <app-role-chip *ngFor="let role of user.roles" [role]="role" />
+      </div>
+    </div>
+  </app-shell-card>
+
+  <div class="claims-layout">
+    <app-shell-card class="fade-up">
+      <h2>New Claim Submission</h2>
+      <form [formGroup]="claimForm" (ngSubmit)="submitClaim()">
+        <label>
+          Policy Number
+          <input type="text" formControlName="policyNumber" placeholder="POL-2026-001245" />
+          <small class="field-error" *ngIf="fieldError('policyNumber', 'Policy number') as message">{{ message }}</small>
+        </label>
+
+        <label>
+          Vehicle Registration
+          <input type="text" formControlName="vehicleRegistration" placeholder="MH12AB1234" />
+          <small class="field-error" *ngIf="fieldError('vehicleRegistration', 'Vehicle registration') as message">{{ message }}</small>
+        </label>
+
+        <label>
+          Loss Date
+          <input type="date" formControlName="incidentDate" />
+          <small class="field-error" *ngIf="fieldError('incidentDate', 'Incident date') as message">{{ message }}</small>
+        </label>
+
+        <label>
+          Incident Location
+          <input type="text" formControlName="incidentLocation" placeholder="Pune, Maharashtra" />
+        </label>
+
+        <label>
+          Incident Description
+          <textarea rows="3" formControlName="incidentDescription"></textarea>
+        </label>
+
+        <label>
+          Claim Amount
+          <input type="number" min="1" formControlName="claimAmount" />
+          <small class="field-error" *ngIf="fieldError('claimAmount', 'Claim amount') as message">{{ message }}</small>
+        </label>
+
+        <button type="submit" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : 'Submit Claim' }}
+        </button>
+      </form>
+    </app-shell-card>
+
+    <app-shell-card class="fade-up">
+      <div class="table-header">
+        <h2>Claim Register</h2>
+        <button type="button" (click)="loadClaims()" [disabled]="isLoading">Refresh</button>
+      </div>
+
+      <p class="feedback success" *ngIf="success">{{ success }}</p>
+      <p class="feedback error" *ngIf="error">{{ error }}</p>
+      <p *ngIf="isLoading">Loading claims...</p>
+
+      <div class="table-wrap" *ngIf="!isLoading">
+        <table *ngIf="claims.length; else emptyState">
+          <thead>
+            <tr>
+              <th>Claim Ref</th>
+              <th>Policy</th>
+              <th>Status</th>
+              <th>Amount</th>
+              <th>Loss Date</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let claim of claims">
+              <td>{{ claim.claimNumber }}</td>
+              <td>{{ claim.policyNumber }}</td>
+              <td>{{ claim.status }}</td>
+              <td>{{ claim.claimAmount | number: '1.0-2' }}</td>
+              <td>{{ claim.incidentDate | date: 'mediumDate' }}</td>
+              <td>{{ claim.createdAt | date: 'short' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #emptyState>
+        <p>No claims are available for your current access scope.</p>
+      </ng-template>
+    </app-shell-card>
+  </div>
+</section>

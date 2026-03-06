@@ -1,201 +1,122 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';
-import { jwtDecode } from 'jwt-decode';
-
-import { environment } from '../../../environments/environment';
-import { User, LoginRequest, RegisterRequest, AuthResponse } from '../models/user.model';
-import { ApiResponse } from '../models/api-response.model';
-
-interface DecodedToken {
-  sub: string;
-  username: string;
-  roles: string[];
-  exp: number;
-  iat: number;
-}
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import {
+  AuthPayload,
+  AuthResponse,
+  RegisterPayload,
+  RoleName,
+  UserProfile
+} from '../models/auth.models';
+import { StandardResponse } from '../models/common.models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = `${environment.apiUrl}/auth`;
-  private readonly TOKEN_KEY = 'claimswift_token';
-  private readonly USER_KEY = 'claimswift_user';
+  private readonly apiBaseUrl = '/api/auth';
+  private readonly tokenStorageKey = 'claimswift_access_token';
+  private readonly userStorageKey = 'claimswift_user';
+  private readonly currentUserSubject = new BehaviorSubject<UserProfile | null>(this.loadUser());
 
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  readonly currentUser$ = this.currentUserSubject.asObservable();
 
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
-    this.loadStoredAuth();
-    this.startTokenRefreshTimer();
-  }
-
-  private loadStoredAuth(): void {
-    const token = localStorage.getItem(this.TOKEN_KEY);
-    const userStr = localStorage.getItem(this.USER_KEY);
-    
-    if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        if (this.isTokenValid(token)) {
-          this.currentUserSubject.next(user);
-          this.isAuthenticatedSubject.next(true);
-        } else {
-          this.logout();
-        }
-      } catch {
-        this.logout();
-      }
+  constructor(private readonly http: HttpClient) {
+    if (!this.isTokenValid(this.getAccessToken())) {
+      this.clearStorage();
     }
   }
 
-  login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<ApiResponse<AuthResponse>>(`${this.API_URL}/login`, credentials)
-      .pipe(
-        map(response => response.data),
-        tap(authData => this.handleAuthentication(authData)),
-        catchError(error => {
-          console.error('Login error:', error);
-          return throwError(() => error);
-        })
-      );
+  login(payload: AuthPayload): Observable<StandardResponse<AuthResponse>> {
+    return this.http
+      .post<StandardResponse<AuthResponse>>(`${this.apiBaseUrl}/login`, payload)
+      .pipe(tap((response) => this.handleAuthSuccess(response.data)));
   }
 
-  register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<ApiResponse<AuthResponse>>(`${this.API_URL}/register`, data)
-      .pipe(
-        map(response => response.data),
-        tap(authData => this.handleAuthentication(authData)),
-        catchError(error => {
-          console.error('Registration error:', error);
-          return throwError(() => error);
-        })
-      );
-  }
-
-  getAdjusters(): Observable<User[]> {
-    return this.http.get<ApiResponse<User[]>>(`${this.API_URL}/adjusters`)
-      .pipe(map(response => response.data));
+  register(payload: RegisterPayload): Observable<StandardResponse<AuthResponse>> {
+    return this.http
+      .post<StandardResponse<AuthResponse>>(`${this.apiBaseUrl}/register`, payload)
+      .pipe(tap((response) => this.handleAuthSuccess(response.data)));
   }
 
   logout(): void {
-    this.clearSessionAndRedirect();
+    this.clearStorage();
   }
 
-  logoutSecure(): Observable<void> {
-    return this.http.post<ApiResponse<void>>(`${this.API_URL}/logout`, {})
-      .pipe(
-        map(response => response.data),
-        catchError(() => of(void 0)),
-        tap(() => this.clearSessionAndRedirect())
-      );
+  getAccessToken(): string | null {
+    return localStorage.getItem(this.tokenStorageKey);
   }
 
-  clearSessionAndRedirect(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    this.currentUserSubject.next(null);
-    this.isAuthenticatedSubject.next(false);
-    this.router.navigate(['/login']);
+  isAuthenticated(): boolean {
+    return this.isTokenValid(this.getAccessToken());
   }
 
-  refreshToken(): Observable<AuthResponse> {
-    return this.http.post<ApiResponse<AuthResponse>>(`${this.API_URL}/refresh`, {})
-      .pipe(
-        map(response => response.data),
-        tap(authData => this.handleAuthentication(authData)),
-        catchError(error => {
-          this.clearSessionAndRedirect();
-          return throwError(() => error);
-        })
-      );
-  }
-
-  private handleAuthentication(authData: AuthResponse): void {
-    localStorage.setItem(this.TOKEN_KEY, authData.accessToken);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(authData.user));
-    this.currentUserSubject.next(authData.user);
-    this.isAuthenticatedSubject.next(true);
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  private isTokenValid(token: string): boolean {
-    try {
-      const decoded: DecodedToken = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      return decoded.exp > currentTime;
-    } catch {
-      return false;
-    }
-  }
-
-  private startTokenRefreshTimer(): void {
-    setInterval(() => {
-      const token = this.getToken();
-      if (token) {
-        try {
-          const decoded: DecodedToken = jwtDecode(token);
-          const currentTime = Date.now() / 1000;
-          const timeUntilExpiry = decoded.exp - currentTime;
-
-          if (timeUntilExpiry < 300 && timeUntilExpiry > 0) {
-            this.refreshToken().subscribe();
-          } else if (timeUntilExpiry <= 0) {
-            this.clearSessionAndRedirect();
-          }
-        } catch {
-          this.clearSessionAndRedirect();
-        }
-      }
-    }, 60000); // Check every minute
-  }
-
-  hasRole(role: string): boolean {
-    const user = this.currentUserSubject.value;
-    if (!user?.roles?.length) return false;
-    const target = this.normalizeRoleName(role);
-    const aliases = new Set<string>([target]);
-
-    if (target === 'ADJUSTER') {
-      aliases.add('POLICYADJUSTER');
-      aliases.add('POLICY_ADJUSTER');
-    }
-
-    if (target === 'POLICYHOLDER') {
-      aliases.add('POLICY_HOLDER');
-    }
-
-    return user.roles.some(currentRole => aliases.has(this.normalizeRoleName(currentRole)));
-  }
-
-  hasAnyRole(roles: string[]): boolean {
-    return roles.some(role => this.hasRole(role));
-  }
-
-  get currentUser(): User | null {
+  getCurrentUserSnapshot(): UserProfile | null {
     return this.currentUserSubject.value;
   }
 
-  get isAuthenticated(): boolean {
-    return this.isAuthenticatedSubject.value;
+  hasRole(role: RoleName): boolean {
+    const user = this.currentUserSubject.value;
+    return !!user?.roles?.includes(role);
   }
 
-  private normalizeRoleName(role: string): string {
-    return role
-      .replace(/^ROLE_/, '')
-      .replace(/[\s-]/g, '_')
-      .toUpperCase();
+  hasAnyRole(roles: RoleName[]): boolean {
+    return roles.some((role) => this.hasRole(role));
+  }
+
+  private handleAuthSuccess(response: AuthResponse): void {
+    localStorage.setItem(this.tokenStorageKey, response.accessToken);
+    localStorage.setItem(this.userStorageKey, JSON.stringify(response.user));
+    this.currentUserSubject.next(response.user);
+  }
+
+  private loadUser(): UserProfile | null {
+    const userJson = localStorage.getItem(this.userStorageKey);
+    if (!userJson) {
+      return null;
+    }
+    try {
+      return JSON.parse(userJson) as UserProfile;
+    } catch {
+      localStorage.removeItem(this.userStorageKey);
+      return null;
+    }
+  }
+
+  private isTokenValid(token: string | null): boolean {
+    if (!token) {
+      return false;
+    }
+
+    const payload = this.decodeJwt(token);
+    if (!payload || typeof payload.exp !== 'number') {
+      return false;
+    }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    return payload.exp > nowInSeconds;
+  }
+
+  private decodeJwt(token: string): { exp?: number } | null {
+    const segments = token.split('.');
+    if (segments.length !== 3) {
+      return null;
+    }
+
+    let payload = segments[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (payload.length % 4 !== 0) {
+      payload += '=';
+    }
+    try {
+      return JSON.parse(atob(payload)) as { exp?: number };
+    } catch {
+      return null;
+    }
+  }
+
+  private clearStorage(): void {
+    localStorage.removeItem(this.tokenStorageKey);
+    localStorage.removeItem(this.userStorageKey);
+    this.currentUserSubject.next(null);
   }
 }

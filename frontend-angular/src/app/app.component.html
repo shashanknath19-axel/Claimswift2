@@ -1,0 +1,32 @@
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" routerLink="/">
+      <span class="brand-mark">CS</span>
+      <span class="brand-text">
+        <strong>ClaimSwift</strong>
+        <small>Claims and Settlements Portal</small>
+      </span>
+    </a>
+
+    <nav class="topbar-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a *ngIf="isAuthenticated$ | async" routerLink="/dashboard" routerLinkActive="active">Workspace</a>
+      <a *ngIf="isAuthenticated$ | async" routerLink="/claims" routerLinkActive="active">Claims</a>
+      <a *ngIf="isAuthenticated$ | async" routerLink="/documents" routerLinkActive="active">Documents</a>
+      <a *ngIf="isAuthenticated$ | async" routerLink="/payments" routerLinkActive="active">Settlements</a>
+      <a *ngIf="canSeeReports$ | async" routerLink="/reports" routerLinkActive="active">Analytics</a>
+      <a *ngIf="isAdmin$ | async" routerLink="/admin/users" routerLinkActive="active">User Admin</a>
+      <a *ngIf="!(isAuthenticated$ | async)" routerLink="/login" routerLinkActive="active">Sign In</a>
+      <a *ngIf="!(isAuthenticated$ | async)" class="cta-link" routerLink="/register">Register</a>
+      <button class="ghost-btn" type="button" (click)="toggleTheme()">
+        {{ (theme$ | async) === 'night' ? 'Light Mode' : 'Dark Mode' }}
+      </button>
+      <span class="user-pill" *ngIf="currentUser$ | async as user">{{ user.username }}</span>
+      <button *ngIf="isAuthenticated$ | async" class="ghost-btn" type="button" (click)="logout()">Sign Out</button>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <router-outlet />
+  </main>
+</div>

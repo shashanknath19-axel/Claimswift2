@@ -1,0 +1,44 @@
+<section class="dashboard">
+  <app-shell-card variant="accent" class="intro fade-up" *ngIf="user$ | async as user">
+    <p class="eyebrow">Operations Workspace</p>
+    <h1>{{ headline$ | async }}</h1>
+    <p class="copy">Signed in as {{ user.username }}. Use the modules below to process assigned claim tasks securely.</p>
+    <div class="roles">
+      <app-role-chip *ngFor="let role of user.roles" [role]="role" />
+    </div>
+  </app-shell-card>
+
+  <div class="stats-grid">
+    <app-stat-tile label="Claims in Queue" [value]="isLoading ? '...' : totalClaims.toString()" tone="teal" />
+    <app-stat-tile label="My Roles" [value]="(user$ | async)?.roles?.length?.toString() || '0'" tone="orange" />
+    <app-stat-tile label="Environment" value="Production" />
+  </div>
+
+  <div class="grid">
+    <app-shell-card class="panel fade-up">
+      <h2>Claims Intake</h2>
+      <p>Submit new incidents, review claim progress, and continue pending actions.</p>
+      <a routerLink="/claims">Open Claims</a>
+    </app-shell-card>
+    <app-shell-card class="panel fade-up">
+      <h2>Document Vault</h2>
+      <p>Upload required evidence and retrieve files attached to claim records.</p>
+      <a routerLink="/documents">Open Documents</a>
+    </app-shell-card>
+    <app-shell-card class="panel fade-up">
+      <h2>Settlements</h2>
+      <p>Create and monitor payout transactions for approved insurance claims.</p>
+      <a routerLink="/payments">Open Settlements</a>
+    </app-shell-card>
+    <app-shell-card class="panel fade-up" *ngIf="isRole('ROLE_ADJUSTER') || isRole('ROLE_MANAGER') || isRole('ROLE_ADMIN')">
+      <h2>Analytics</h2>
+      <p>Review claim volume, settlement trends, and adjuster productivity.</p>
+      <a routerLink="/reports">Open Analytics</a>
+    </app-shell-card>
+    <app-shell-card class="panel fade-up" *ngIf="isRole('ROLE_ADMIN')">
+      <h2>User Administration</h2>
+      <p>Provision internal users and enforce role and account status controls.</p>
+      <a routerLink="/admin/users">Open User Admin</a>
+    </app-shell-card>
+  </div>
+</section>

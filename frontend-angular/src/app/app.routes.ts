@@ -1,147 +1,67 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from './core/guards/auth.guard';
-import { RoleGuard } from './core/guards/role.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
+import { ClaimsComponent } from './pages/claims/claims.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { DocumentsComponent } from './pages/documents/documents.component';
+import { HomeComponent } from './pages/home/home.component';
+import { LoginComponent } from './pages/login/login.component';
+import { PaymentsComponent } from './pages/payments/payments.component';
+import { RegisterComponent } from './pages/register/register.component';
+import { ReportsComponent } from './pages/reports/reports.component';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
-    pathMatch: 'full'
+    component: HomeComponent
   },
   {
     path: 'login',
-    loadComponent: () => import('./features/auth/login-page.component').then(m => m.LoginPageComponent)
+    component: LoginComponent
   },
   {
     path: 'register',
-    loadComponent: () => import('./features/auth/register-page.component').then(m => m.RegisterPageComponent)
+    component: RegisterComponent
   },
   {
     path: 'dashboard',
-    canActivate: [AuthGuard],
-    loadComponent: () => import('./features/dashboard/dashboard-page.component').then(m => m.DashboardPageComponent)
+    canActivate: [authGuard],
+    component: DashboardComponent
   },
   {
     path: 'claims',
-    canActivate: [AuthGuard],
-    children: [
-      {
-        path: '',
-        loadComponent: () => import('./features/claims/claims-list-page.component').then(m => m.ClaimsListPageComponent)
-      },
-      {
-        path: 'history',
-        canActivate: [RoleGuard],
-        data: { roles: ['POLICYHOLDER'] },
-        loadComponent: () => import('./features/claims/claim-history-page.component').then(m => m.ClaimHistoryPageComponent)
-      },
-      {
-        path: 'new',
-        canActivate: [RoleGuard],
-        data: { roles: ['POLICYHOLDER', 'ADMIN'] },
-        loadComponent: () => import('./features/claims/claim-form-page.component').then(m => m.ClaimFormPageComponent)
-      },
-      {
-        path: ':id',
-        loadComponent: () => import('./features/claims/claim-detail-page.component').then(m => m.ClaimDetailPageComponent)
-      },
-      {
-        path: ':id/edit',
-        canActivate: [RoleGuard],
-        data: { roles: ['POLICYHOLDER', 'ADMIN'] },
-        loadComponent: () => import('./features/claims/claim-form-page.component').then(m => m.ClaimFormPageComponent)
-      },
-      {
-        path: ':id/tracking',
-        loadComponent: () => import('./features/claims/claim-tracking-page.component').then(m => m.ClaimTrackingPageComponent)
-      }
-    ]
+    canActivate: [authGuard],
+    component: ClaimsComponent
   },
   {
     path: 'documents',
-    canActivate: [AuthGuard],
-    children: [
-      {
-        path: '',
-        canActivate: [RoleGuard],
-        data: { roles: ['POLICYHOLDER', 'ADMIN'] },
-        loadComponent: () => import('./features/documents/documents-page.component').then(m => m.DocumentsPageComponent)
-      },
-      {
-        path: 'upload',
-        canActivate: [RoleGuard],
-        data: { roles: ['POLICYHOLDER', 'ADMIN'] },
-        loadComponent: () => import('./features/documents/document-upload-page.component').then(m => m.DocumentUploadPageComponent)
-      }
-    ]
-  },
-  {
-    path: 'notifications',
-    canActivate: [AuthGuard],
-    loadComponent: () => import('./features/notifications/notifications-page.component').then(m => m.NotificationsPageComponent)
-  },
-  {
-    path: 'profile',
-    canActivate: [AuthGuard],
-    loadComponent: () => import('./features/misc/profile-page.component').then(m => m.ProfilePageComponent)
-  },
-  {
-    path: 'settings',
-    canActivate: [AuthGuard],
-    loadComponent: () => import('./features/misc/settings-page.component').then(m => m.SettingsPageComponent)
-  },
-  {
-    path: 'admin',
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['MANAGER', 'ADJUSTER', 'ADMIN'] },
-    children: [
-      {
-        path: 'dashboard',
-        canActivate: [RoleGuard],
-        data: { roles: ['MANAGER', 'ADMIN'] },
-        loadComponent: () => import('./features/admin/admin-dashboard-page.component').then(m => m.AdminDashboardPageComponent)
-      },
-      {
-        path: 'claims',
-        loadComponent: () => import('./features/admin/admin-claims-page.component').then(m => m.AdminClaimsPageComponent)
-      },
-      {
-        path: 'users',
-        canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] },
-        loadComponent: () => import('./features/admin/admin-users-page.component').then(m => m.AdminUsersPageComponent),
-      }
-    ]
-  },
-  {
-    path: 'reports',
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['MANAGER', 'ADMIN'] },
-    loadComponent: () => import('./features/reports/reports-page.component').then(m => m.ReportsPageComponent)
+    canActivate: [authGuard],
+    component: DocumentsComponent
   },
   {
     path: 'payments',
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['MANAGER', 'ADMIN'] },
-    loadComponent: () => import('./features/payments/payments-page.component').then(m => m.PaymentsPageComponent)
+    canActivate: [authGuard],
+    component: PaymentsComponent
   },
   {
-    path: 'assessment',
-    canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['ADJUSTER', 'MANAGER', 'ADMIN'] },
-    children: [
-      {
-        path: ':claimId',
-        loadComponent: () => import('./features/assessment/assessment-page.component').then(m => m.AssessmentPageComponent)
-      }
-    ]
+    path: 'reports',
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ROLE_ADJUSTER', 'ROLE_MANAGER', 'ROLE_ADMIN']
+    },
+    component: ReportsComponent
   },
   {
-    path: 'unauthorized',
-    loadComponent: () => import('./features/misc/unauthorized-page.component').then(m => m.UnauthorizedPageComponent)
+    path: 'admin/users',
+    canActivate: [authGuard, roleGuard],
+    data: {
+      roles: ['ROLE_ADMIN']
+    },
+    component: AdminUsersComponent
   },
   {
     path: '**',
-    loadComponent: () => import('./features/misc/not-found-page.component').then(m => m.NotFoundPageComponent)
+    redirectTo: ''
   }
 ];

@@ -1,0 +1,32 @@
+<section class="auth-layout fade-up">
+  <div class="auth-card surface-card">
+    <p class="eyebrow">Policyholder and Staff Access</p>
+    <h1>Sign in to ClaimSwift</h1>
+    <p class="subtext">Access claim files, evidence records, decision queues, and settlement activity.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label>
+        Username or email
+        <input type="text" formControlName="usernameOrEmail" placeholder="john123 or john@example.com" />
+        <small class="field-error" *ngIf="fieldError('usernameOrEmail', 'Username or email') as message">{{ message }}</small>
+      </label>
+
+      <label>
+        Password
+        <input type="password" formControlName="password" placeholder="Enter your password" />
+        <small class="field-error" *ngIf="fieldError('password', 'Password') as message">{{ message }}</small>
+      </label>
+
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Signing in...' : 'Sign In' }}
+      </button>
+    </form>
+
+    <p class="redirect">
+      First visit?
+      <a routerLink="/register">Create a policyholder account</a>
+    </p>
+  </div>
+</section>

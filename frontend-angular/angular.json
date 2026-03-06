@@ -1,9 +1,12 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
+  "cli": {
+    "packageManager": "npm"
+  },
   "newProjectRoot": "projects",
   "projects": {
-    "claimswift-frontend": {
+    "frontend-angular": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -15,12 +18,14 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/claimswift-frontend",
+            "outputPath": "dist/frontend-angular",
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": ["src/polyfills.ts", "zone.js"],
+            "browser": "src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -28,15 +33,7 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "@angular/material/prebuilt-themes/indigo-pink.css",
-              "src/styles.scss",
-              "node_modules/ngx-toastr/toastr.css",
-              "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
-            ],
-            "allowedCommonJsDependencies": [
-              "@stomp/stompjs",
-              "sockjs-client"
+              "src/styles.scss"
             ],
             "scripts": []
           },
@@ -45,19 +42,21 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1300kb",
-                  "maximumError": "1400kb"
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
                 }
               ],
               "outputHashing": "all"
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -66,21 +65,27 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "claimswift-frontend:build:production"
+              "buildTarget": "frontend-angular:build:production"
             },
             "development": {
-              "buildTarget": "claimswift-frontend:build:development"
+              "buildTarget": "frontend-angular:build:development"
             }
           },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n"
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "frontend-angular:build"
+          }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": ["src/polyfills.ts", "zone.js", "zone.js/testing"],
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -88,8 +93,6 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss"
             ],
             "scripts": []
