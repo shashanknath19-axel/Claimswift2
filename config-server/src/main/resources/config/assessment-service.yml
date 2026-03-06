@@ -7,7 +7,7 @@ spring:
   datasource:
     url: ${ASSESSMENT_DB_URL:jdbc:mysql://localhost:3306/assessment_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     username: ${ASSESSMENT_DB_USERNAME:root}
-    password: ${ASSESSMENT_DB_PASSWORD:Axelblaze10}
+    password: ${ASSESSMENT_DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 15
